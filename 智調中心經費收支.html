@@ -1,0 +1,1823 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>智調中心 經費收支</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=LXGW+WenKai+TC:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #EEF3EF;
+  --sheet: #FAFCFA;
+  --field: #FFFFFF;
+  --rule: #D2E1D5;
+  --rule-strong: #8DB098;
+  --ink: #1C2A23;
+  --ink-soft: #55675C;
+  --ink-faint: #85958B;
+  --hover: #E6EFE8;
+  --income: #1B6A4A;
+  --expense: #A5362A;
+  --seal: #BC2F26;
+  --accent: #2A4B7C;
+  --accent-ink: #FFFFFF;
+  --warn: #8E5C10;
+  --tint-inc: #E3F0E8;
+  --tint-exp: #F7E4E0;
+  --backdrop: rgba(18, 28, 23, .45);
+  --font-ui: "IBM Plex Sans", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+  --font-hand: "LXGW WenKai TC", "Kaiti TC", "BiauKai", "DFKai-SB", "Noto Serif TC", serif;
+  color-scheme: light;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #121916; --sheet: #18211D; --field: #0F1512; --rule: #2B3A33; --rule-strong: #4C6B5A;
+    --ink: #E2EBE5; --ink-soft: #A2B4A9; --ink-faint: #74877C; --hover: #1F2B26;
+    --income: #63C195; --expense: #F0806F; --seal: #F06A5B; --accent: #93B6EC; --accent-ink: #0F1A2B;
+    --warn: #E3AC52; --tint-inc: #1C3329; --tint-exp: #3A2220; --backdrop: rgba(0,0,0,.6);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #121916; --sheet: #18211D; --field: #0F1512; --rule: #2B3A33; --rule-strong: #4C6B5A;
+  --ink: #E2EBE5; --ink-soft: #A2B4A9; --ink-faint: #74877C; --hover: #1F2B26;
+  --income: #63C195; --expense: #F0806F; --seal: #F06A5B; --accent: #93B6EC; --accent-ink: #0F1A2B;
+  --warn: #E3AC52; --tint-inc: #1C3329; --tint-exp: #3A2220; --backdrop: rgba(0,0,0,.6);
+  color-scheme: dark;
+}
+*, *::before, *::after { box-sizing: inherit; }
+html { scroll-padding-top: env(safe-area-inset-top, 0px); -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--font-ui); font-size: 15px; line-height: 1.6; }
+[hidden] { display: none !important; }
+img, svg { max-width: 100%; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+h1, h2, h3 { margin: 0; }
+h2 { font-family: var(--font-hand); font-weight: 700; font-size: 19px; letter-spacing: .02em; }
+.grow { flex: 1 1 auto; }
+.muted { color: var(--ink-soft); }
+.c-income { color: var(--income); }
+.c-expense { color: var(--expense); }
+.num { font-variant-numeric: tabular-nums; }
+
+/* header */
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10; background: var(--paper); border-bottom: 1px solid var(--rule); }
+.top-inner { max-width: 1120px; margin: 0 auto; padding: 14px 24px 0; }
+.title-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.logo-seal { flex: 0 0 auto; display: inline-flex; flex-direction: column; align-items: center; justify-content: center; font-family: var(--font-hand); font-weight: 700; color: var(--seal); border: 2px solid currentColor; outline: 1px solid currentColor; outline-offset: 2px; border-radius: 4px; font-size: 14px; line-height: 1.08; padding: 3px 4px; transform: rotate(-3deg); user-select: none; }
+.logo-seal span { display: block; }
+h1 { font-family: var(--font-hand); font-weight: 700; font-size: 26px; letter-spacing: .03em; line-height: 1.2; }
+.tabs { display: flex; gap: 2px; margin-top: 8px; overflow-x: auto; scrollbar-width: none; }
+.tab { appearance: none; border: 0; background: none; padding: 8px 12px 10px; font: inherit; color: var(--ink-soft); border-bottom: 2px solid transparent; cursor: pointer; white-space: nowrap; }
+.tab:hover { color: var(--ink); }
+.tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--ink); font-weight: 600; }
+
+/* controls */
+.btn { font: inherit; font-weight: 500; border-radius: 5px; padding: 7px 14px; border: 1px solid var(--rule-strong); background: var(--sheet); color: var(--ink); cursor: pointer; min-height: 38px; line-height: 1.4; white-space: nowrap; }
+.btn:hover { background: var(--hover); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn.primary:hover { filter: brightness(1.08); }
+.btn.danger { color: var(--expense); border-color: var(--expense); background: transparent; }
+.btn.danger-fill { background: var(--expense); border-color: var(--expense); color: var(--sheet); }
+.btn.small { padding: 4px 10px; min-height: 32px; font-size: 14px; }
+.btn:disabled { opacity: .55; cursor: default; }
+.linkish { background: none; border: 0; padding: 0; font: inherit; color: var(--accent); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; text-align: left; }
+input, select, textarea { font: inherit; color: var(--ink); background: var(--field); border: 1px solid var(--rule-strong); border-radius: 5px; padding: 6px 10px; min-height: 38px; max-width: 100%; }
+textarea { resize: vertical; min-height: 60px; }
+input:disabled, select:disabled, textarea:disabled { opacity: .75; }
+fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+
+/* layout */
+main { max-width: 1120px; margin: 0 auto; padding: 22px 24px 64px; }
+.sheet { background: var(--sheet); border: 1px solid var(--rule); border-radius: 6px; padding: 22px 26px 26px; }
+.notice { border: 1px solid var(--warn); color: var(--warn); background: color-mix(in srgb, var(--warn) 8%, transparent); border-radius: 6px; padding: 10px 14px; margin-bottom: 16px; font-size: 14px; }
+.loading { color: var(--ink-soft); padding: 28px 0; }
+.block { margin-top: 30px; }
+.block-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding-bottom: 6px; border-bottom: 1px solid var(--rule-strong); margin-bottom: 8px; flex-wrap: wrap; }
+.split { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 0 36px; }
+@media (max-width: 900px) { .split { grid-template-columns: minmax(0, 1fr); } }
+
+/* settlement line */
+.settle { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 2px solid var(--ink); border-bottom: 1px solid var(--rule); }
+.settle > div { padding: 12px 16px 14px; text-align: right; border-left: 1px solid var(--rule); min-width: 0; }
+.settle > div:first-child { border-left: 0; padding-left: 0; }
+.settle .lbl { display: block; font-family: var(--font-hand); font-size: 16px; color: var(--ink-soft); }
+.settle .num { font-size: 30px; font-weight: 600; letter-spacing: -.01em; line-height: 1.25; overflow-wrap: anywhere; }
+.settle .balance u { text-decoration: none; border-bottom: 3px double currentColor; padding-bottom: 1px; }
+.settle-note { margin: 8px 0 0; font-size: 13px; color: var(--ink-faint); }
+.pending { display: flex; gap: 8px 22px; flex-wrap: wrap; margin-top: 10px; font-size: 14px; color: var(--ink-soft); }
+@media (max-width: 560px) {
+  .settle { grid-template-columns: minmax(0, 1fr); }
+  .settle > div { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; border-left: 0; border-top: 1px solid var(--rule); padding: 10px 0; }
+  .settle > div:first-child { border-top: 0; }
+  .settle .num { font-size: 22px; }
+}
+
+/* chart */
+.legend { font-size: 13px; color: var(--ink-soft); display: inline-flex; align-items: center; gap: 6px; }
+.sw { display: inline-block; width: 10px; height: 10px; margin-left: 8px; }
+.sw.inc { background: var(--income); } .sw.exp { background: var(--expense); }
+.chart-scroll { overflow-x: auto; }
+svg.chart { display: block; width: 100%; min-width: 640px; height: auto; }
+svg.chart .g { stroke: var(--rule); stroke-width: 1; }
+svg.chart .base { stroke: var(--ink-soft); stroke-width: 1; }
+svg.chart .ax { fill: var(--ink-faint); font-size: 12px; font-family: var(--font-ui); }
+svg.chart .bi { fill: var(--income); }
+svg.chart .be { fill: var(--expense); }
+svg.chart .hit { fill: transparent; }
+svg.chart g:hover .hit { fill: var(--hover); }
+
+/* projects (compact + full) */
+.bar { position: relative; display: block; height: 8px; background: var(--rule); border-radius: 1px; }
+.bar .fill { position: absolute; left: 0; top: 0; bottom: 0; background: var(--accent); border-radius: 1px; }
+.bar.near .fill { background: var(--warn); }
+.bar.over .fill { background: var(--expense); }
+.bar .tick { position: absolute; top: -4px; bottom: -4px; width: 2px; margin-left: -1px; background: var(--ink); }
+.flag { display: inline-block; font-size: 12px; font-weight: 600; padding: 0 6px; border-radius: 3px; margin-left: 6px; }
+.flag.over { color: var(--expense); border: 1px solid currentColor; }
+.flag.lag { color: var(--warn); border: 1px solid currentColor; }
+.proj-row { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.2fr) 7.5em; gap: 6px 16px; align-items: center; border-bottom: 1px solid var(--rule); padding: 12px 4px; }
+.proj-row .p-name { display: block; font: inherit; font-weight: 500; color: inherit; background: none; border: 0; padding: 0; text-align: left; cursor: pointer; overflow-wrap: anywhere; text-decoration: underline; text-decoration-color: var(--rule-strong); text-underline-offset: 4px; }
+.proj-row .p-name:hover { text-decoration-color: currentColor; }
+.p-add { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+.btn.tiny { padding: 2px 10px; min-height: 30px; font-size: 13.5px; }
+.btn.add-inc { color: var(--income); border-color: var(--income); background: transparent; }
+.btn.add-inc:hover { background: var(--tint-inc); }
+.btn.add-exp { color: var(--expense); border-color: var(--expense); background: transparent; }
+.btn.add-exp:hover { background: var(--tint-exp); }
+.proj-row .p-note { display: block; font-size: 12.5px; color: var(--ink-soft); margin-top: 5px; }
+.proj-row .p-num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.proj-row .p-num small { display: block; font-size: 12px; color: var(--ink-faint); }
+@media (max-width: 560px) { .proj-row { grid-template-columns: minmax(0, 1fr) 7.5em; } .proj-row .p-exec { grid-column: 1 / -1; grid-row: 2; } }
+
+.cats { list-style: none; margin: 0; padding: 0; }
+.cats button { display: grid; grid-template-columns: minmax(5em, 8em) minmax(0, 1fr) auto; align-items: center; gap: 12px; width: 100%; background: none; border: 0; border-bottom: 1px solid var(--rule); padding: 9px 4px; font: inherit; color: inherit; text-align: left; cursor: pointer; }
+.cats button:hover { background: var(--hover); }
+.c-name { overflow-wrap: anywhere; }
+.c-bar { display: block; height: 6px; background: var(--rule); }
+.c-bar span { display: block; height: 100%; background: var(--expense); }
+.c-val { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.c-val small { color: var(--ink-faint); margin-left: 6px; font-size: 12px; }
+
+.empty { padding: 36px 0 20px; max-width: 34em; }
+.empty p { color: var(--ink-soft); margin: 10px 0 18px; }
+.empty-act { display: flex; gap: 10px; flex-wrap: wrap; }
+
+/* ledger */
+.filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.filters select { flex: 0 1 auto; max-width: 14em; }
+.filters input[type="search"] { flex: 1 1 200px; min-width: 160px; }
+@media (max-width: 560px) {
+  .filters { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .filters select { max-width: none; width: 100%; }
+  .filters input[type="search"] { grid-column: 1 / -1; min-width: 0; }
+  .filters .btn { grid-column: 1 / -1; }
+}
+.lsum { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: baseline; margin: 16px 0 6px; font-size: 14px; color: var(--ink-soft); }
+.table-wrap { overflow-x: auto; }
+.ledger { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 680px; }
+.ledger th { text-align: left; font-weight: 500; color: var(--ink-soft); font-size: 13px; padding: 8px 10px; border-bottom: 2px solid var(--ink); white-space: nowrap; }
+.ledger th.num, .ledger td.num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.ledger th button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+.ledger td { padding: 10px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+.ledger tr.row { cursor: pointer; }
+.ledger tr.row:hover { background: var(--hover); }
+.ledger td.c-date { white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--ink-soft); }
+.ledger td.c-cat { color: var(--ink-soft); white-space: nowrap; }
+.ledger .sum { overflow-wrap: anywhere; }
+.ledger .sub { font-size: 12.5px; color: var(--ink-faint); margin-top: 2px; }
+.ledger td.c-inc, .ledger td.c-exp { font-weight: 500; }
+.ledger tfoot td { font-weight: 600; padding: 9px 10px; }
+.ledger tfoot tr.tot td { border-top: 1px solid var(--ink); border-bottom: 0; }
+.ledger tfoot tr.net td { border-bottom: 3px double var(--ink); color: var(--ink-soft); font-weight: 500; }
+.ledger tfoot tr.net td.num { color: var(--ink); font-weight: 600; }
+.more { margin-top: 14px; }
+@media (max-width: 960px) { .ledger .c-vou { display: none; } }
+@media (max-width: 720px) {
+  .ledger { min-width: 0; }
+  .ledger thead { display: none; }
+  .ledger, .ledger tbody, .ledger tfoot { display: block; }
+  .ledger tr.row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "date cat st" "sum sum amt"; gap: 3px 10px; padding: 11px 2px; border-bottom: 1px solid var(--rule); }
+  .ledger tr.row td { border: 0; padding: 0; }
+  .ledger td.c-date { grid-area: date; font-size: 13px; }
+  .ledger td.c-cat { grid-area: cat; font-size: 13px; }
+  .ledger td.c-st { grid-area: st; justify-self: end; }
+  .ledger td.c-sum { grid-area: sum; }
+  .ledger td.c-inc, .ledger td.c-exp { grid-area: amt; align-self: end; font-size: 15px; }
+  .ledger td.empty, .ledger td.c-hand, .ledger td.c-vou { display: none; }
+  .ledger tfoot { border-top: 1px solid var(--ink); border-bottom: 3px double var(--ink); }
+  .ledger tfoot tr { display: flex; justify-content: space-between; gap: 12px; padding: 8px 2px 0; }
+  .ledger tfoot tr.net { padding-bottom: 8px; }
+  .ledger tfoot td { border: 0 !important; padding: 0; }
+  .ledger tfoot td:first-child { margin-right: auto; }
+}
+
+/* statuses */
+.seal { display: inline-block; font-family: var(--font-hand); font-weight: 700; font-size: 13px; line-height: 1.35; color: var(--seal); border: 1.5px solid currentColor; outline: 1px solid currentColor; outline-offset: 1.5px; padding: 0 5px; border-radius: 3px; letter-spacing: .08em; transform: rotate(var(--r, -4deg)); opacity: .9; white-space: nowrap; margin: 2px 0; }
+.st-open { font-size: 13px; color: var(--warn); white-space: nowrap; }
+.st-proc { font-size: 13px; color: var(--accent); white-space: nowrap; }
+
+/* monthly fixed expenses */
+.due { border: 1px dashed var(--rule-strong); border-radius: 6px; padding: 10px 16px 6px; margin-top: 16px; }
+.due-title { font-family: var(--font-hand); font-weight: 700; font-size: 17px; margin: 0 0 2px; }
+.due-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 9px 0; border-top: 1px solid var(--rule); }
+.due-title + .due-row { border-top: 0; }
+.due-text { flex: 1 1 260px; min-width: 0; font-size: 14px; overflow-wrap: anywhere; }
+.due-text strong { font-weight: 600; }
+.due-act { display: flex; gap: 6px; flex-wrap: wrap; }
+.rec-line { font-size: 13px; color: var(--ink-soft); margin: 8px 0 0; }
+.rec-line .warn { color: var(--warn); }
+.rec-rule { border: 1px solid var(--rule); border-radius: 6px; padding: 10px; display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 1fr) auto; gap: 8px; margin-bottom: 8px; align-items: center; }
+.rec-rule input, .rec-rule select { min-height: 34px; padding: 4px 8px; min-width: 0; width: 100%; }
+.rec-rule .r2 { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; font-size: 13.5px; color: var(--ink-soft); }
+#pRec .rec-rule .r2 input { width: 11.5em; }
+#pRec .rec-rule .r2 select { width: auto; }
+.rec-rule .r-err { grid-column: 1 / -1; margin: 0; }
+@media (max-width: 560px) { .rec-rule { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto; } .rec-rule .r-sum { grid-column: 1 / -2; } }
+
+/* projects view */
+.pv-tools { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.seg { display: inline-flex; border: 1px solid var(--rule-strong); border-radius: 5px; overflow: hidden; }
+.seg button { font: inherit; font-size: 14px; border: 0; background: transparent; color: var(--ink-soft); padding: 6px 14px; cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--rule-strong); }
+.seg button[aria-pressed="true"] { background: var(--hover); color: var(--ink); font-weight: 600; }
+.pv-row { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1.4fr) minmax(0, 1.3fr) auto; gap: 14px 22px; padding: 18px 0; border-bottom: 1px solid var(--rule); align-items: start; }
+.pv-row h3 { font-size: 16px; font-weight: 600; overflow-wrap: anywhere; }
+.pv-sub { margin: 3px 0 0; font-size: 13px; color: var(--ink-soft); overflow-wrap: anywhere; }
+.closed-tag { display: inline-block; font-size: 12px; color: var(--ink-soft); border: 1px solid var(--rule-strong); border-radius: 3px; padding: 0 6px; margin-top: 6px; }
+.pv-figs { display: grid; grid-template-columns: auto auto; gap: 2px 14px; margin: 0; font-size: 14px; }
+.pv-figs dt { color: var(--ink-soft); }
+.pv-figs dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
+.pv-exec .bar { margin-top: 8px; }
+.pv-note { margin: 8px 0 0; font-size: 13px; color: var(--ink-soft); }
+.pv-act { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+@media (max-width: 860px) { .pv-row { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .pv-act { justify-content: flex-start; } }
+@media (max-width: 560px) { .pv-row { grid-template-columns: minmax(0, 1fr); } }
+
+/* settings */
+.set-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 36px; }
+.set-grid .block { margin-top: 26px; }
+.set-grid .block:nth-child(-n+2) { margin-top: 0; }
+@media (max-width: 760px) { .set-grid { grid-template-columns: minmax(0, 1fr); } .set-grid .block:nth-child(2) { margin-top: 26px; } }
+.field { min-width: 0; }
+.field > label, .flabel { display: block; font-size: 13px; color: var(--ink-soft); margin-bottom: 4px; }
+.field input:not([type="radio"]):not([type="checkbox"]), .field select, .field textarea { width: 100%; }
+.stack > * + * { margin-top: 12px; }
+.radio-line { display: flex; flex-direction: column; gap: 6px; }
+.radio-line label { display: flex; gap: 8px; align-items: center; cursor: pointer; }
+.radio-line input { min-height: 0; accent-color: var(--accent); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 12px; }
+.chip { display: inline-flex; align-items: center; gap: 2px; border: 1px solid var(--rule-strong); border-radius: 4px; padding: 3px 4px 3px 10px; font-size: 14px; }
+.chip-x { border: 0; background: none; color: var(--ink-faint); cursor: pointer; font-size: 16px; line-height: 1; padding: 2px 6px; border-radius: 3px; }
+.chip-x:hover { color: var(--expense); background: var(--hover); }
+.add-row { display: flex; gap: 8px; }
+.add-row input { flex: 1 1 auto; min-width: 0; }
+.help { font-size: 13.5px; color: var(--ink-soft); margin: 6px 0 0; }
+
+/* dialogs */
+dialog { border: 1px solid var(--rule-strong); border-radius: 8px; padding: 0; width: min(580px, calc(100vw - 20px)); max-height: calc(100dvh - 24px); background: var(--sheet); color: var(--ink); }
+dialog[open] { display: flex; flex-direction: column; }
+dialog::backdrop { background: var(--backdrop); }
+dialog form { display: flex; flex-direction: column; min-height: 0; max-height: inherit; }
+.dlg-head { padding: 18px 22px 12px; border-bottom: 1px solid var(--rule); }
+.dlg-head h2 { font-size: 20px; }
+.dlg-meta { margin: 4px 0 0; font-size: 12.5px; color: var(--ink-faint); }
+.dlg-body { padding: 16px 22px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px 16px; overflow: auto; flex: 1 1 auto; min-height: 0; }
+.dlg-body .full { grid-column: 1 / -1; }
+.dlg-foot { padding: 12px 22px 16px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; border-top: 1px solid var(--rule); }
+.flash { font-size: 13px; color: var(--income); }
+.flash.bad { color: var(--expense); }
+.err { color: var(--expense); font-size: 12.5px; margin-top: 3px; min-height: 0; }
+.err:empty { display: none; }
+[aria-invalid="true"] { border-color: var(--expense); }
+.typeseg { display: inline-flex; border: 1px solid var(--rule-strong); border-radius: 6px; overflow: hidden; }
+.typeseg button { font: inherit; font-weight: 500; padding: 7px 24px; border: 0; background: transparent; color: var(--ink-soft); cursor: pointer; }
+.typeseg button + button { border-left: 1px solid var(--rule-strong); }
+.typeseg button[data-t="income"][aria-pressed="true"] { background: var(--tint-inc); color: var(--income); }
+.typeseg button[data-t="expense"][aria-pressed="true"] { background: var(--tint-exp); color: var(--expense); }
+#eAmount { font-size: 20px; font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
+.radios { display: flex; flex-wrap: wrap; gap: 8px; }
+.rchip { position: relative; }
+.rchip input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; min-height: 0; }
+.rchip span { display: inline-block; padding: 5px 13px; border: 1px solid var(--rule-strong); border-radius: 999px; font-size: 14px; }
+.rchip input:checked + span { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 13%, transparent); color: var(--accent); font-weight: 600; }
+.rchip input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+#confirmDlg { width: min(440px, calc(100vw - 20px)); }
+#confirmDlg p { margin: 0; padding: 20px 22px 8px; }
+#confirmDlg .dlg-foot { border-top: 0; justify-content: flex-end; }
+@media (max-width: 560px) { .dlg-body { grid-template-columns: minmax(0, 1fr); } .top-inner { padding: 12px 16px 0; } main { padding: 16px 12px 56px; } .sheet { padding: 16px 14px 20px; } h1 { font-size: 22px; } }
+
+/* toast */
+.toast-wrap { position: fixed; left: 0; right: 0; bottom: 0; padding: 0 16px calc(18px + env(safe-area-inset-bottom, 0px)); display: flex; justify-content: center; pointer-events: none; z-index: 50; }
+.toast { background: var(--ink); color: var(--sheet); padding: 9px 16px; border-radius: 6px; font-size: 14px; opacity: 0; transform: translateY(8px); transition: opacity .18s ease, transform .18s ease; }
+.toast.show { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-inner">
+    <div class="title-row">
+      <span class="logo-seal" id="logoSeal" aria-hidden="true"><span>智</span><span>調</span></span>
+      <h1 id="title">智調中心 經費收支</h1>
+      <span class="grow"></span>
+      <select id="period" aria-label="期間"></select>
+      <button class="btn primary" id="addBtn" type="button" hidden>記一筆</button>
+    </div>
+    <nav class="tabs" role="tablist" aria-label="頁面">
+      <button class="tab" role="tab" type="button" data-view="overview" id="tab-overview" aria-controls="view-overview" aria-selected="true">總覽</button>
+      <button class="tab" role="tab" type="button" data-view="ledger" id="tab-ledger" aria-controls="view-ledger" aria-selected="false">收支明細</button>
+      <button class="tab" role="tab" type="button" data-view="projects" id="tab-projects" aria-controls="view-projects" aria-selected="false">計畫預算</button>
+      <button class="tab" role="tab" type="button" data-view="settings" id="tab-settings" aria-controls="view-settings" aria-selected="false">設定</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div id="notice" class="notice" role="status" hidden></div>
+
+  <section id="view-overview" class="view" role="tabpanel" aria-labelledby="tab-overview">
+    <div class="sheet" id="ov"><p class="loading">正在讀取資料…</p></div>
+  </section>
+
+  <section id="view-ledger" class="view" role="tabpanel" aria-labelledby="tab-ledger" hidden>
+    <div class="sheet">
+      <div class="filters">
+        <select id="fType" aria-label="類型">
+          <option value="all">收入與支出</option>
+          <option value="income">只看收入</option>
+          <option value="expense">只看支出</option>
+        </select>
+        <select id="fProject" aria-label="計畫"></select>
+        <select id="fCat" aria-label="科目"></select>
+        <select id="fStatus" aria-label="狀態">
+          <option value="all">所有狀態</option>
+          <option value="open">尚未完成</option>
+          <optgroup label="支出">
+            <option value="x:unsubmitted">未送件</option>
+            <option value="x:processing">核銷中</option>
+            <option value="x:done">已核銷</option>
+          </optgroup>
+          <optgroup label="收入">
+            <option value="i:pending">待入帳</option>
+            <option value="i:done">已入帳</option>
+          </optgroup>
+        </select>
+        <input id="fQ" type="search" placeholder="搜尋摘要、經手人、憑證編號" aria-label="搜尋">
+        <button id="exportBtn" class="btn" type="button" hidden>匯出 CSV</button>
+      </div>
+      <div id="ledgerSum" class="lsum"></div>
+      <div class="table-wrap" id="ledgerWrap">
+        <table class="ledger" id="ledgerTable">
+          <thead>
+            <tr>
+              <th><button type="button" id="sortBtn">日期 ↓</button></th>
+              <th>科目</th>
+              <th>摘要</th>
+              <th class="c-hand">經手人</th>
+              <th class="c-vou">憑證編號</th>
+              <th>狀態</th>
+              <th class="num">收入</th>
+              <th class="num">支出</th>
+            </tr>
+          </thead>
+          <tbody id="ledgerBody"></tbody>
+          <tfoot id="ledgerFoot"></tfoot>
+        </table>
+      </div>
+      <div id="ledgerEmpty"></div>
+      <div class="more" id="moreWrap" hidden><button class="btn" type="button" id="moreBtn">再顯示 200 筆</button></div>
+    </div>
+  </section>
+
+  <section id="view-projects" class="view" role="tabpanel" aria-labelledby="tab-projects" hidden>
+    <div class="sheet">
+      <div class="pv-tools">
+        <div class="seg" role="group" aria-label="計畫狀態">
+          <button type="button" data-pf="active" aria-pressed="true">執行中</button>
+          <button type="button" data-pf="closed" aria-pressed="false">已結案</button>
+          <button type="button" data-pf="all" aria-pressed="false">全部</button>
+        </div>
+        <span class="grow"></span>
+        <button class="btn primary" type="button" id="addProj" hidden>新增計畫</button>
+      </div>
+      <p class="help">藍色長條是經費執行率，黑色刻線是計畫期間已經過了多少。刻線跑在長條前面很多，代表經費用得比時間慢。</p>
+      <div id="projList"></div>
+    </div>
+  </section>
+
+  <section id="view-settings" class="view" role="tabpanel" aria-labelledby="tab-settings" hidden>
+    <div class="sheet">
+      <div class="set-grid">
+        <section class="block">
+          <div class="block-head"><h2>中心資料</h2></div>
+          <fieldset id="basicFields" class="stack">
+            <div class="field"><label for="sName">中心名稱</label><input id="sName" maxlength="30" autocomplete="off"></div>
+            <div class="field">
+              <span class="flabel">年度怎麼算</span>
+              <div class="radio-line">
+                <label><input type="radio" name="sFiscal" value="1"> 曆年制，1 月到 12 月</label>
+                <label><input type="radio" name="sFiscal" value="8"> 學年度制，8 月到隔年 7 月</label>
+              </div>
+            </div>
+            <div><button class="btn primary" type="button" id="saveBasics">儲存</button></div>
+          </fieldset>
+        </section>
+        <section class="block">
+          <div class="block-head"><h2>資料與分享</h2></div>
+          <p class="help" id="dataInfo"></p>
+          <div class="field" style="margin-top:16px">
+            <span class="flabel">日期顯示（只影響這台電腦）</span>
+            <div class="radio-line">
+              <label><input type="radio" name="sDate" value="roc"> 民國年，例如 115/09/30</label>
+              <label><input type="radio" name="sDate" value="ad"> 西元年，例如 2026/09/30</label>
+            </div>
+          </div>
+        </section>
+        <section class="block">
+          <div class="block-head"><h2>收入科目</h2></div>
+          <div class="chips" id="incCats"></div>
+          <div class="add-row" id="incAddRow"><input id="incNew" maxlength="20" placeholder="新增收入科目" aria-label="新增收入科目"><button class="btn" type="button" data-action="add-cat" data-kind="income">新增</button></div>
+        </section>
+        <section class="block">
+          <div class="block-head"><h2>支出科目</h2></div>
+          <div class="chips" id="expCats"></div>
+          <div class="add-row" id="expAddRow"><input id="expNew" maxlength="20" placeholder="新增支出科目" aria-label="新增支出科目"><button class="btn" type="button" data-action="add-cat" data-kind="expense">新增</button></div>
+        </section>
+      </div>
+      <p class="help" style="margin-top:22px">移除科目只會讓它從選單消失，已經記下的紀錄會保留原本的科目名稱。</p>
+    </div>
+  </section>
+</main>
+
+<dialog id="entryDlg" aria-labelledby="entryTitle">
+  <form id="entryForm" novalidate>
+    <div class="dlg-head">
+      <h2 id="entryTitle">記一筆</h2>
+      <p class="dlg-meta" id="entryMeta"></p>
+    </div>
+    <fieldset class="dlg-body" id="eFields">
+      <div class="field full">
+        <div class="typeseg" role="group" aria-label="類型">
+          <button type="button" data-t="income" aria-pressed="false">收入</button>
+          <button type="button" data-t="expense" aria-pressed="true">支出</button>
+        </div>
+      </div>
+      <div class="field"><label for="eDate">日期</label><input id="eDate" type="date"><div class="err" id="eDateErr"></div></div>
+      <div class="field"><label for="eAmount">金額（元）</label><input id="eAmount" inputmode="numeric" autocomplete="off"><div class="err" id="eAmountErr"></div></div>
+      <div class="field"><label for="eCat">科目</label><select id="eCat"></select></div>
+      <div class="field"><label for="eProject">計畫</label><select id="eProject"></select></div>
+      <div class="field full"><label for="eSummary">摘要</label><input id="eSummary" maxlength="120" autocomplete="off" placeholder="例如：9 月電訪訪員費"><div class="err" id="eSummaryErr"></div></div>
+      <div class="field"><label for="eHandler">經手人</label><input id="eHandler" maxlength="40" autocomplete="off"></div>
+      <div class="field"><label for="eVoucher">憑證編號</label><input id="eVoucher" maxlength="40" autocomplete="off" placeholder="發票或收據號碼"></div>
+      <div class="field full"><span class="flabel" id="eStatusLbl">核銷狀態</span><div class="radios" id="eStatus" role="radiogroup" aria-labelledby="eStatusLbl"></div></div>
+      <div class="field full"><label for="eNote">備註</label><textarea id="eNote" rows="2" maxlength="500"></textarea></div>
+    </fieldset>
+    <div class="dlg-foot">
+      <button type="button" class="btn danger" id="eDelete">刪除</button>
+      <span class="flash" id="eFlash" role="status"></span>
+      <span class="grow"></span>
+      <button type="button" class="btn" id="eCancel">取消</button>
+      <button type="button" class="btn" id="eSaveNext">儲存並再記一筆</button>
+      <button type="submit" class="btn primary" id="eSave">儲存</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="projDlg" aria-labelledby="projTitle">
+  <form id="projForm" novalidate>
+    <div class="dlg-head"><h2 id="projTitle">新增計畫</h2></div>
+    <fieldset class="dlg-body" id="pFields">
+      <div class="field full"><label for="pName">計畫名稱</label><input id="pName" maxlength="120" autocomplete="off"><div class="err" id="pNameErr"></div></div>
+      <div class="field"><label for="pCode">計畫編號</label><input id="pCode" maxlength="60" autocomplete="off"></div>
+      <div class="field"><label for="pSponsor">委託或補助單位</label><input id="pSponsor" maxlength="120" autocomplete="off"></div>
+      <div class="field"><label for="pBudget">核定經費（元）</label><input id="pBudget" inputmode="numeric" autocomplete="off"><div class="err" id="pBudgetErr"></div></div>
+      <div class="field"><label for="pStatus">狀態</label><select id="pStatus"><option value="active">執行中</option><option value="closed">已結案</option></select></div>
+      <div class="field"><label for="pStart">開始日期</label><input id="pStart" type="date"></div>
+      <div class="field"><label for="pEnd">結束日期</label><input id="pEnd" type="date"><div class="err" id="pEndErr"></div></div>
+      <div class="field full"><label for="pNote">備註</label><textarea id="pNote" rows="2" maxlength="500"></textarea></div>
+      <div class="field full">
+        <span class="flabel">每月固定支出</span>
+        <div id="pRec"></div>
+        <button type="button" class="btn small" id="pRecAdd">新增固定支出</button>
+        <p class="help">設定後，每到新的月份，總覽會列出還沒記的固定支出，按一下就記好。</p>
+      </div>
+    </fieldset>
+    <div class="dlg-foot">
+      <button type="button" class="btn danger" id="pDelete">刪除</button>
+      <span class="flash" id="pFlash" role="status"></span>
+      <span class="grow"></span>
+      <button type="button" class="btn" id="pCancel">取消</button>
+      <button type="submit" class="btn primary" id="pSave">儲存</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="confirmDlg" aria-labelledby="confirmMsg">
+  <p id="confirmMsg"></p>
+  <div class="dlg-foot">
+    <button type="button" class="btn" id="cNo">取消</button>
+    <button type="button" class="btn danger-fill" id="cYes">刪除</button>
+  </div>
+</dialog>
+
+<div class="toast-wrap"><div id="toast" class="toast" role="status" aria-live="polite"></div></div>
+
+<script>
+(() => {
+'use strict';
+
+/* ---------- constants ---------- */
+const DEFAULTS = {
+  centerName: '智調中心',
+  fiscalStart: 1,
+  incomeCats: ['委託計畫收入', '政府補助款', '學校撥款', '調查服務收入', '研習課程收入', '其他收入'],
+  expenseCats: ['人事費', '訪員費', '工讀費', '出席費／審查費', '受訪者禮品', '印刷費', '文具耗材', '郵電費', '差旅費', '軟體及資料庫', '設備費', '管理費', '雜支']
+};
+const STATUS = {
+  expense: [{ v: 'unsubmitted', t: '未送件' }, { v: 'processing', t: '核銷中' }, { v: 'done', t: '已核銷' }],
+  income: [{ v: 'pending', t: '待入帳' }, { v: 'done', t: '已入帳' }]
+};
+const STATUS_TEXT = { expense: { unsubmitted: '未送件', processing: '核銷中', done: '已核銷' }, income: { pending: '待入帳', done: '已入帳' } };
+const LKEY = 'zhidiao-ledger-v1';
+const PREF_DATE = 'zhidiao-date-style';
+const PAGE = 200;
+const MSG_LOCAL = '目前連不上共用資料庫，資料只會存在這台電腦的瀏覽器裡。換電腦或清除瀏覽資料就會看不到，同事也看不到。';
+const MSG_RO = '你目前只能檢視，不能新增或修改資料。需要一起記帳的話，請頁面擁有者把你的權限調成可以編輯。';
+
+/* ---------- state ---------- */
+const S = {
+  mode: 'loading',
+  entries: [], projects: [], settingsDoc: null,
+  loaded: { entries: false, projects: false, settings: false },
+  canWrite: true,
+  myId: null,
+  view: 'overview',
+  period: null,
+  filters: { type: 'all', project: 'all', category: 'all', status: 'all', q: '' },
+  sortAsc: false,
+  limit: PAGE,
+  projFilter: 'active',
+  dateStyle: 'roc'
+};
+let DB = null, USER = null, DL = null;
+const LOCAL = { entries: {}, projects: {}, settings: null };
+let unsubs = [];
+
+/* ---------- utils ---------- */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const nf = new Intl.NumberFormat('zh-TW', { maximumFractionDigits: 0 });
+const money = n => nf.format(Math.round(Number(n) || 0));
+const pad = n => String(n).padStart(2, '0');
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const genId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 9);
+const str = (v, max = 500) => typeof v === 'string' ? v.slice(0, max) : '';
+const validDate = s => typeof s === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(s);
+const validMonth = s => typeof s === 'string' && /^\d{4}-(0[1-9]|1[0-2])$/.test(s);
+const hasOwn = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
+const byName = (a, b) => a.name.localeCompare(b.name, 'zh-Hant');
+const pct = r => Math.round(r * 100) + '%';
+function localDateStr(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+function todayStr() { return localDateStr(new Date()); }
+function fmtDate(s) {
+  if (!validDate(s)) return s || '';
+  const [y, m, d] = s.split('-');
+  return S.dateStyle === 'roc' ? `${Number(y) - 1911}/${m}/${d}` : `${y}/${m}/${d}`;
+}
+function fmtDateTime(iso) {
+  const d = new Date(iso);
+  if (isNaN(d)) return '';
+  return fmtDate(localDateStr(d)) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+}
+function fyOf(dateStr, start) {
+  const y = Number(dateStr.slice(0, 4)), m = Number(dateStr.slice(5, 7));
+  return start === 1 ? y : (m >= start ? y : y - 1);
+}
+function fyLabel(fy, start) {
+  return start === 1 ? `${fy - 1911} 年度（${fy}）` : `${fy - 1911} 學年度（${fy}/8 到 ${fy + 1}/7）`;
+}
+function fyRange(fy, start) {
+  const endY = start === 1 ? fy : fy + 1;
+  const endM = start === 1 ? 12 : start - 1;
+  const last = new Date(endY, endM, 0).getDate();
+  return [`${fy}-${pad(start)}-01`, `${endY}-${pad(endM)}-${pad(last)}`];
+}
+function parseAmount(v, allowZero) {
+  const t = String(v == null ? '' : v).replace(/[\s,，元]/g, '').replace(/^NT\$?/i, '').replace(/^\$/, '');
+  if (!/^\d+(\.0+)?$/.test(t)) return null;
+  const n = Math.round(Number(t));
+  if (!isFinite(n) || n >= 1e12) return null;
+  if (n === 0 && !allowZero) return null;
+  return n;
+}
+
+/* ---------- normalization (shared data is untrusted) ---------- */
+function normEntry(id, d) {
+  d = d || {};
+  const type = d.type === 'income' ? 'income' : 'expense';
+  let amount = Number(d.amount);
+  if (!isFinite(amount) || amount < 0) amount = 0;
+  let status = str(d.status, 20);
+  if (!Object.prototype.hasOwnProperty.call(STATUS_TEXT[type], status)) status = type === 'income' ? 'done' : 'unsubmitted';
+  return {
+    id, type, amount, status,
+    date: validDate(d.date) ? d.date : '',
+    projectId: str(d.projectId, 200),
+    category: str(d.category, 40),
+    summary: str(d.summary, 200),
+    handler: str(d.handler, 60),
+    voucherNo: str(d.voucherNo, 60),
+    note: str(d.note, 1000),
+    createdBy: str(d.createdBy, 200) || null,
+    createdAt: str(d.createdAt, 40),
+    updatedBy: str(d.updatedBy, 200) || null,
+    updatedAt: str(d.updatedAt, 40)
+  };
+}
+function normProject(id, d) {
+  d = d || {};
+  let budget = Number(d.budget);
+  if (!isFinite(budget) || budget < 0) budget = 0;
+  return {
+    id, budget,
+    name: str(d.name, 120) || '（未命名計畫）',
+    code: str(d.code, 60),
+    sponsor: str(d.sponsor, 120),
+    start: validDate(d.start) ? d.start : '',
+    end: validDate(d.end) ? d.end : '',
+    status: d.status === 'closed' ? 'closed' : 'active',
+    note: str(d.note, 1000),
+    recurring: Array.isArray(d.recurring) ? d.recurring.slice(0, 12).map(normRule).filter(Boolean) : [],
+    createdBy: str(d.createdBy, 200) || null,
+    createdAt: str(d.createdAt, 40),
+    updatedAt: str(d.updatedAt, 40)
+  };
+}
+function normRule(r) {
+  if (!r || typeof r !== 'object') return null;
+  const id = str(r.id, 60);
+  if (!/^[A-Za-z0-9_.~:@+-]+$/.test(id) || !validMonth(r.start)) return null;
+  const amount = Number(r.amount);
+  return {
+    id,
+    summary: str(r.summary, 30) || '固定支出',
+    category: str(r.category, 20) || '雜支',
+    amount: isFinite(amount) && amount > 0 ? Math.round(amount) : 0,
+    start: r.start,
+    end: validMonth(r.end) ? r.end : '',
+    status: hasOwn(STATUS_TEXT.expense, r.status) ? r.status : 'unsubmitted',
+    doneMonths: Array.isArray(r.doneMonths) ? r.doneMonths.filter(validMonth).slice(-240) : []
+  };
+}
+function projectBody(p) {
+  return {
+    name: p.name, budget: p.budget, code: p.code, sponsor: p.sponsor, status: p.status,
+    start: p.start, end: p.end, note: p.note,
+    recurring: (p.recurring || []).map(r => ({ id: r.id, summary: r.summary, category: r.category, amount: r.amount, start: r.start, end: r.end, status: r.status, doneMonths: r.doneMonths.slice() })),
+    createdBy: p.createdBy || null,
+    createdAt: p.createdAt || new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+}
+function settings() {
+  const d = S.settingsDoc || {};
+  const cats = (a, def) => {
+    if (!Array.isArray(a)) return def.slice();
+    const out = [];
+    for (const x of a) {
+      if (typeof x !== 'string') continue;
+      const t = x.trim().slice(0, 20);
+      if (t && !out.includes(t)) out.push(t);
+    }
+    return out.length ? out : def.slice();
+  };
+  return {
+    centerName: str(d.centerName, 30).trim() || DEFAULTS.centerName,
+    fiscalStart: d.fiscalStart === 8 ? 8 : 1,
+    incomeCats: cats(d.incomeCats, DEFAULTS.incomeCats),
+    expenseCats: cats(d.expenseCats, DEFAULTS.expenseCats)
+  };
+}
+function projMap() { const m = {}; for (const p of S.projects) m[p.id] = p; return m; }
+
+/* ---------- storage backends ---------- */
+async function withRetry(fn) {
+  try { return await fn(); }
+  catch (e) {
+    if (e && e.code === 'unavailable') { await sleep(500 + Math.random() * 700); return await fn(); }
+    throw e;
+  }
+}
+function persistLocal() {
+  try { localStorage.setItem(LKEY, JSON.stringify(LOCAL)); return true; } catch (e) { return false; }
+}
+function syncFromLocal() {
+  S.entries = Object.keys(LOCAL.entries).map(id => normEntry(id, LOCAL.entries[id]));
+  S.projects = Object.keys(LOCAL.projects).map(id => normProject(id, LOCAL.projects[id]));
+  S.settingsDoc = LOCAL.settings;
+}
+let localWarned = false;
+function afterLocalWrite() {
+  if (!persistLocal() && !localWarned) { localWarned = true; showNotice('這個瀏覽器不允許儲存資料，重新整理後剛才的紀錄會消失。'); }
+  syncFromLocal();
+  renderAll();
+}
+const Store = {
+  async setDoc(coll, id, body) {
+    if (S.mode === 'shared') {
+      const ref = id ? DB.collection(coll).doc(id) : DB.collection(coll).doc();
+      await withRetry(() => ref.set(body));
+      return ref.id;
+    }
+    const nid = id || genId();
+    LOCAL[coll][nid] = body;
+    afterLocalWrite();
+    return nid;
+  },
+  async del(coll, id) {
+    if (S.mode === 'shared') { await withRetry(() => DB.collection(coll).doc(id).delete()); return; }
+    delete LOCAL[coll][id];
+    afterLocalWrite();
+  },
+  async setSettings(body) {
+    if (S.mode === 'shared') { await withRetry(() => DB.doc('settings/main').set(body)); return; }
+    LOCAL.settings = body;
+    afterLocalWrite();
+  }
+};
+function writeErrMsg(e) {
+  const c = e && e.code;
+  if (c === 'invalid_argument') { setReadOnly(MSG_RO); return '沒有修改權限，這次沒有儲存。'; }
+  if (c === 'revoked') { setReadOnly('存取權限已經變更，這個頁面目前只能檢視。'); return '存取權限已經變更，這次沒有儲存。'; }
+  if (c === 'quota_exceeded') return '資料庫已滿，請先刪除不需要的舊紀錄再試。';
+  if (c === 'resource_exhausted') return '操作太頻繁，請等幾秒再試一次。';
+  return '連線不穩，這次沒有儲存，請再試一次。';
+}
+function setReadOnly(msg) {
+  if (S.mode === 'local') return;
+  S.canWrite = false;
+  showNotice(msg);
+  renderAll();
+}
+function showNotice(msg) { const n = $('#notice'); n.textContent = msg; n.hidden = false; }
+
+function startLocal() {
+  S.mode = 'local';
+  S.canWrite = true;
+  try {
+    const raw = localStorage.getItem(LKEY);
+    if (raw) {
+      const o = JSON.parse(raw);
+      if (o && typeof o === 'object') {
+        if (o.entries && typeof o.entries === 'object') LOCAL.entries = o.entries;
+        if (o.projects && typeof o.projects === 'object') LOCAL.projects = o.projects;
+        if (o.settings && typeof o.settings === 'object') LOCAL.settings = o.settings;
+      }
+    }
+  } catch (e) { /* start empty */ }
+  syncFromLocal();
+  S.loaded = { entries: true, projects: true, settings: true };
+  showNotice(MSG_LOCAL);
+  renderAll();
+}
+let resubscribed = false;
+function subscribe() {
+  unsubs.forEach(u => { try { u(); } catch (e) {} });
+  unsubs = [];
+  unsubs.push(DB.collection('entries').onSnapshot(snap => {
+    S.entries = snap.docs.map(d => normEntry(d.id, d.data()));
+    S.loaded.entries = true;
+    renderAll();
+  }, onSubErr));
+  unsubs.push(DB.collection('projects').onSnapshot(snap => {
+    S.projects = snap.docs.map(d => normProject(d.id, d.data()));
+    S.loaded.projects = true;
+    renderAll();
+  }, onSubErr));
+  unsubs.push(DB.doc('settings/main').onSnapshot(snap => {
+    S.settingsDoc = snap.exists ? (snap.data() || null) : null;
+    S.loaded.settings = true;
+    renderAll();
+  }, onSubErr));
+}
+function onSubErr(e) {
+  const c = e && e.code;
+  if (c === 'unavailable' && !resubscribed) { resubscribed = true; setTimeout(subscribe, 1500); return; }
+  S.loaded = { entries: true, projects: true, settings: true };
+  if (c === 'revoked') { S.canWrite = false; showNotice('存取權限已經變更，這個頁面目前無法讀取最新資料。'); }
+  else showNotice('暫時讀不到資料，請重新整理頁面再試。');
+  renderAll();
+}
+
+async function init() {
+  bindUI();
+  try { const p = localStorage.getItem(PREF_DATE); if (p === 'ad' || p === 'roc') S.dateStyle = p; } catch (e) {}
+  renderAll();
+  const c = window.claude;
+  if (!c || typeof c.use !== 'function') { startLocal(); return; }
+  const tryUse = n => { try { return Promise.resolve(c.use(n)).catch(() => null); } catch (e) { return Promise.resolve(null); } };
+  const [db, user, dl] = await Promise.all([tryUse('db'), tryUse('user'), tryUse('downloads')]);
+  USER = user; DL = dl;
+  if (user) {
+    try { S.myId = await user.id(); } catch (e) {}
+  }
+  if (!db) { startLocal(); return; }
+  DB = db;
+  S.mode = 'shared';
+  if (user) {
+    try { const w = await user.can('data.write'); if (w === false) { S.canWrite = false; showNotice(MSG_RO); } } catch (e) {}
+  }
+  subscribe();
+  renderAll();
+}
+
+/* ---------- period ---------- */
+function defaultPeriod() { return 'fy:' + fyOf(todayStr(), settings().fiscalStart); }
+function periodOptions() {
+  const st = settings().fiscalStart;
+  const years = new Set([fyOf(todayStr(), st)]);
+  for (const e of S.entries) if (e.date) years.add(fyOf(e.date, st));
+  const list = Array.from(years).sort((a, b) => b - a).map(y => ({ v: 'fy:' + y, t: fyLabel(y, st) }));
+  list.push({ v: 'all', t: '全部期間' });
+  return list;
+}
+function periodRange() {
+  if (!S.period || S.period === 'all') return null;
+  return fyRange(Number(S.period.slice(3)), settings().fiscalStart);
+}
+function inPeriod(e) {
+  const r = periodRange();
+  if (!r) return true;
+  return !!e.date && e.date >= r[0] && e.date <= r[1];
+}
+function periodName() {
+  if (!S.period || S.period === 'all') return '全部期間';
+  const fy = Number(S.period.slice(3));
+  return settings().fiscalStart === 1 ? `${fy - 1911} 年度` : `${fy - 1911} 學年度`;
+}
+
+/* ---------- rendering ---------- */
+function ready() {
+  if (S.mode === 'local') return true;
+  if (S.mode !== 'shared') return false;
+  return S.loaded.entries && S.loaded.projects && S.loaded.settings;
+}
+const loadingHtml = () => '<p class="loading">正在讀取資料…</p>';
+
+function renderAll() {
+  renderHeader();
+  if (S.view === 'overview') renderOverview();
+  else if (S.view === 'ledger') renderLedger();
+  else if (S.view === 'projects') renderProjects();
+  else renderSettings();
+}
+
+function setOptions(sel, html, value, fallback) {
+  if (sel.dataset.sig !== html) { sel.innerHTML = html; sel.dataset.sig = html; }
+  const has = Array.from(sel.options).some(o => o.value === value);
+  sel.value = has ? value : fallback;
+  return sel.value;
+}
+
+function renderHeader() {
+  const st = settings();
+  $('#title').textContent = `${st.centerName} 經費收支`;
+  document.title = `${st.centerName} 經費收支`;
+  const sealHtml = Array.from(st.centerName).slice(0, 2).map(ch => `<span>${esc(ch)}</span>`).join('');
+  if ($('#logoSeal').innerHTML !== sealHtml) $('#logoSeal').innerHTML = sealHtml;
+  const opts = periodOptions();
+  if (!S.period || !opts.some(o => o.v === S.period)) S.period = defaultPeriod();
+  S.period = setOptions($('#period'), opts.map(o => `<option value="${o.v}">${esc(o.t)}</option>`).join(''), S.period, defaultPeriod());
+  $('#period').hidden = !(S.view === 'overview' || S.view === 'ledger');
+  $('#addBtn').hidden = !(S.canWrite && ready());
+  $$('.tab').forEach(t => t.setAttribute('aria-selected', String(t.dataset.view === S.view)));
+}
+
+/* overview */
+function projStats() {
+  const m = {};
+  for (const e of S.entries) {
+    if (!e.projectId) continue;
+    const s = m[e.projectId] || (m[e.projectId] = { inc: 0, exp: 0, n: 0 });
+    if (e.type === 'income') s.inc += e.amount; else s.exp += e.amount;
+    s.n++;
+  }
+  return m;
+}
+function timeProgress(s, e) {
+  if (!validDate(s) || !validDate(e)) return null;
+  const a = new Date(s + 'T00:00:00').getTime(), b = new Date(e + 'T23:59:59').getTime();
+  if (!(b > a)) return null;
+  return Math.max(0, Math.min(1, (Date.now() - a) / (b - a)));
+}
+function execInfo(p, s) {
+  const exp = s ? s.exp : 0, inc = s ? s.inc : 0;
+  const rate = p.budget > 0 ? exp / p.budget : null;
+  const t = timeProgress(p.start, p.end);
+  let flag = '';
+  if (rate !== null && rate > 1) flag = 'over';
+  else if (rate !== null && rate >= 0.9) flag = 'near';
+  const lag = p.status === 'active' && rate !== null && t !== null && (t - rate) >= 0.25;
+  return { exp, inc, rate, t, flag, lag, remain: p.budget - exp };
+}
+function barHtml(x) {
+  const w = x.rate === null ? 0 : Math.min(1, x.rate) * 100;
+  const tick = x.t === null ? '' : `<span class="tick" style="left:${(x.t * 100).toFixed(1)}%"></span>`;
+  return `<span class="bar ${x.flag}" aria-hidden="true"><span class="fill" style="width:${w.toFixed(1)}%"></span>${tick}</span>`;
+}
+function execNote(x) {
+  if (x.rate === null) return '尚未填核定經費';
+  let s = `經費執行 ${pct(x.rate)}`;
+  if (x.t !== null) s += `，時間已過 ${pct(x.t)}`;
+  return s;
+}
+function curMonth() { return todayStr().slice(0, 7); }
+function monthsBetween(a, b) {
+  const out = [];
+  let [y, m] = a.split('-').map(Number);
+  const [ey, em] = b.split('-').map(Number);
+  let g = 0;
+  while ((y < ey || (y === ey && m <= em)) && g++ < 600) { out.push(`${y}-${pad(m)}`); if (++m > 12) { m = 1; y++; } }
+  return out;
+}
+function fmtYm(ym) { const [y, m] = ym.split('-'); return S.dateStyle === 'roc' ? `${Number(y) - 1911}/${m}` : `${y}/${m}`; }
+function fmtMonths(ms) {
+  const thisYear = Number(curMonth().slice(0, 4));
+  const lab = ym => {
+    const [y, m] = ym.split('-').map(Number);
+    return (y === thisYear ? '' : (S.dateStyle === 'roc' ? `${y - 1911} 年 ` : `${y} 年 `)) + `${m} 月`;
+  };
+  if (ms.length <= 4) return ms.map(lab).join('、');
+  return `${lab(ms[0])}到${lab(ms[ms.length - 1])}，共 ${ms.length} 個月`;
+}
+const recId = (pid, rid, ym) => `rec-${pid}-${rid}-${ym}`;
+function dueGroups() {
+  const now = curMonth();
+  const ids = new Set(S.entries.map(e => e.id));
+  const out = [];
+  for (const p of S.projects) {
+    if (p.status !== 'active') continue;
+    for (const r of p.recurring) {
+      if (!r.amount) continue;
+      const last = r.end && r.end < now ? r.end : now;
+      if (r.start > last) continue;
+      const done = new Set(r.doneMonths);
+      const months = monthsBetween(r.start, last).filter(ym => !done.has(ym) && !ids.has(recId(p.id, r.id, ym)));
+      if (months.length) out.push({ p, r, months });
+    }
+  }
+  return out;
+}
+function dueHtml() {
+  if (!S.canWrite) return '';
+  const gs = dueGroups();
+  if (!gs.length) return '';
+  return `<div class="due"><p class="due-title">每月固定支出還沒記</p>${gs.map(g => `<div class="due-row">
+      <div class="due-text"><strong>${esc(g.r.summary)} 每月 ${money(g.r.amount)} 元</strong>，${esc(g.p.name)}<br><span class="muted">${esc(fmtMonths(g.months))}</span></div>
+      <div class="due-act">
+        <button type="button" class="btn small primary" data-action="rec-do" data-pid="${esc(g.p.id)}" data-rid="${esc(g.r.id)}">記入 ${Math.min(g.months.length, 36)} 筆</button>
+        <button type="button" class="btn small" data-action="rec-skip" data-pid="${esc(g.p.id)}" data-rid="${esc(g.r.id)}">這幾個月不用記</button>
+      </div>
+    </div>`).join('')}</div>`;
+}
+function recLines(p, due) {
+  if (!p.recurring.length) return '';
+  return p.recurring.map(r => {
+    const g = due.find(x => x.p.id === p.id && x.r.id === r.id);
+    return `<p class="rec-line">每月固定支出：${esc(r.summary)} ${money(r.amount)} 元，${esc(fmtYm(r.start))} 起${r.end ? `到 ${esc(fmtYm(r.end))}` : ''}${g ? `<span class="warn">。${esc(fmtMonths(g.months))}還沒記</span>` : ''}</p>`;
+  }).join('');
+}
+function recEntryBody(p, r, ym) {
+  const [y, m] = ym.split('-').map(Number);
+  const now = new Date().toISOString();
+  return {
+    date: `${ym}-${pad(new Date(y, m, 0).getDate())}`, type: 'expense', amount: r.amount,
+    summary: `${m}月${r.summary}`, category: r.category, status: r.status, projectId: p.id,
+    handler: '', voucherNo: '', note: '每月固定支出',
+    createdBy: S.myId || null, createdAt: now, updatedBy: S.myId || null, updatedAt: now
+  };
+}
+let recBusy = false;
+async function recordDue(pid, rid, skip) {
+  if (recBusy || !S.canWrite) return;
+  const g = dueGroups().find(x => x.p.id === pid && x.r.id === rid);
+  if (!g) return;
+  const months = g.months.slice(0, 36);
+  if (skip) {
+    const ok = await confirmBox(`${fmtMonths(months)}的${g.r.summary}不用記嗎？之後不會再提醒這幾個月。`, '不用記');
+    if (!ok) return;
+  }
+  recBusy = true;
+  try {
+    let n = 0;
+    if (!skip) {
+      for (const ym of months) {
+        const id = recId(pid, rid, ym);
+        if (S.entries.some(e => e.id === id)) continue;
+        await Store.setDoc('entries', id, recEntryBody(g.p, g.r, ym));
+        n++;
+      }
+    }
+    const latest = S.projects.find(x => x.id === pid) || g.p;
+    const rules = latest.recurring.map(r => r.id === rid
+      ? Object.assign({}, r, { doneMonths: Array.from(new Set(r.doneMonths.concat(months))).sort().slice(-240) })
+      : r);
+    await Store.setDoc('projects', pid, projectBody(Object.assign({}, latest, { recurring: rules })));
+    toast(skip ? '好，這幾個月不會再提醒' : `已記入 ${n} 筆`);
+  } catch (err) {
+    toast(writeErrMsg(err));
+  } finally {
+    recBusy = false;
+  }
+}
+function flagsHtml(x) {
+  return (x.flag === 'over' ? '<span class="flag over">超支</span>' : '') + (x.lag ? '<span class="flag lag">執行落後</span>' : '');
+}
+function niceMax(v) {
+  const p = Math.pow(10, Math.floor(Math.log10(v)));
+  const n = v / p;
+  const s = n <= 1 ? 1 : n <= 2 ? 2 : n <= 2.5 ? 2.5 : n <= 5 ? 5 : 10;
+  return s * p;
+}
+function axisFmt(v) {
+  if (v === 0) return '0';
+  if (v >= 10000) { const w = v / 10000; return (Number.isInteger(w) ? w : w.toFixed(1)) + '萬'; }
+  return nf.format(v);
+}
+function monthlyChart(list) {
+  const empty = '<p class="muted">這段期間還沒有紀錄。</p>';
+  let months = [];
+  if (!S.period || S.period === 'all') {
+    const keys = list.filter(e => e.date).map(e => e.date.slice(0, 7)).sort();
+    if (!keys.length) return empty;
+    let [y, m] = keys[0].split('-').map(Number);
+    const [ey, em] = keys[keys.length - 1].split('-').map(Number);
+    let guard = 0;
+    while ((y < ey || (y === ey && m <= em)) && guard++ < 1200) { months.push(`${y}-${pad(m)}`); if (++m > 12) { m = 1; y++; } }
+    if (months.length > 24) months = months.slice(-24);
+  } else {
+    if (!list.length) return empty;
+    let y = Number(S.period.slice(3)), m = settings().fiscalStart;
+    for (let i = 0; i < 12; i++) { months.push(`${y}-${pad(m)}`); if (++m > 12) { m = 1; y++; } }
+  }
+  const agg = {};
+  months.forEach(k => { agg[k] = { inc: 0, exp: 0 }; });
+  for (const e of list) {
+    const k = e.date ? e.date.slice(0, 7) : '';
+    if (agg[k]) agg[k][e.type === 'income' ? 'inc' : 'exp'] += e.amount;
+  }
+  const peak = Math.max(1, ...months.map(k => Math.max(agg[k].inc, agg[k].exp)));
+  const top = niceMax(peak);
+  const box = $('#ov');
+  const inner = box ? box.clientWidth - (parseFloat(getComputedStyle(box).paddingLeft) || 0) - (parseFloat(getComputedStyle(box).paddingRight) || 0) : 720;
+  const W = Math.max(640, Math.round(inner || 720)), H = 240, L = 54, R = 8, T = 14, B = 30, PH = H - T - B;
+  const cw = (W - L - R) / months.length;
+  const bw = Math.max(3, Math.min(16, cw * 0.3));
+  let s = '';
+  for (let i = 0; i <= 4; i++) {
+    const v = top * i / 4, y = T + PH - PH * i / 4;
+    s += `<line class="g" x1="${L}" x2="${W - R}" y1="${y.toFixed(1)}" y2="${y.toFixed(1)}"/><text class="ax" x="${L - 8}" y="${(y + 4).toFixed(1)}" text-anchor="end">${axisFmt(v)}</text>`;
+  }
+  months.forEach((k, i) => {
+    const cx = L + cw * i + cw / 2, a = agg[k];
+    const [yy, mm] = k.split('-').map(Number);
+    const lbl = (!S.period || S.period === 'all') ? `${S.dateStyle === 'roc' ? yy - 1911 : yy}/${mm}` : `${mm}月`;
+    const hi = a.inc ? Math.max(1.5, a.inc / top * PH) : 0;
+    const he = a.exp ? Math.max(1.5, a.exp / top * PH) : 0;
+    s += `<g><title>${esc(`${lbl}：收入 ${money(a.inc)} 元，支出 ${money(a.exp)} 元`)}</title><rect class="hit" x="${(cx - cw / 2).toFixed(1)}" y="${T}" width="${cw.toFixed(1)}" height="${PH}"/>`;
+    if (hi) s += `<rect class="bi" x="${(cx - bw - 1).toFixed(1)}" y="${(T + PH - hi).toFixed(1)}" width="${bw.toFixed(1)}" height="${hi.toFixed(1)}"/>`;
+    if (he) s += `<rect class="be" x="${(cx + 1).toFixed(1)}" y="${(T + PH - he).toFixed(1)}" width="${bw.toFixed(1)}" height="${he.toFixed(1)}"/>`;
+    s += '</g>';
+    if (months.length <= 12 || i % 3 === 0 || i === months.length - 1) s += `<text class="ax" x="${cx.toFixed(1)}" y="${H - 9}" text-anchor="middle">${lbl}</text>`;
+  });
+  s += `<line class="base" x1="${L}" x2="${W - R}" y1="${T + PH}" y2="${T + PH}"/>`;
+  let lastIdx = 0;
+  months.forEach((k, i) => { if (agg[k].inc || agg[k].exp) lastIdx = i; });
+  const focus = (L + cw * lastIdx + cw / 2) / W;
+  return `<svg class="chart" data-focus="${focus.toFixed(3)}" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(periodName())}每月收入與支出">${s}</svg>`;
+}
+function addButtons(p, size) {
+  if (!S.canWrite || p.status !== 'active') return '';
+  const n = esc(p.name);
+  return `<div class="p-add">
+    <button type="button" class="btn ${size} add-inc" data-action="add-to-project" data-type="income" data-pid="${esc(p.id)}" aria-label="在「${n}」記一筆收入">記收入</button>
+    <button type="button" class="btn ${size} add-exp" data-action="add-to-project" data-type="expense" data-pid="${esc(p.id)}" aria-label="在「${n}」記一筆支出">記支出</button>
+  </div>`;
+}
+function ovProjects() {
+  const act = S.projects.filter(p => p.status === 'active').sort(byName);
+  if (!act.length) {
+    return `<p class="muted">沒有執行中的計畫。${S.canWrite ? ' <button type="button" class="linkish" data-action="new-project">建立計畫</button>' : ''}</p>`;
+  }
+  const stats = projStats();
+  return act.map(p => {
+    const x = execInfo(p, stats[p.id]);
+    return `<div class="proj-row">
+      <div class="p-head">
+        <button type="button" class="p-name" data-action="proj-ledger" data-pid="${esc(p.id)}" title="查看這個計畫的收支明細">${esc(p.name)}</button>
+        ${addButtons(p, 'tiny')}
+      </div>
+      <span class="p-exec">${barHtml(x)}<span class="p-note">${esc(execNote(x))}${flagsHtml(x)}</span></span>
+      <span class="p-num"><small>預算餘額</small><span class="${x.remain < 0 ? 'c-expense' : ''}">${p.budget > 0 ? money(x.remain) : '—'}</span></span>
+    </div>`;
+  }).join('');
+}
+function catBreakdown(list) {
+  const m = new Map();
+  let total = 0;
+  for (const e of list) {
+    if (e.type !== 'expense') continue;
+    const k = e.category || '未分類';
+    m.set(k, (m.get(k) || 0) + e.amount);
+    total += e.amount;
+  }
+  if (!m.size || !total) return '<p class="muted">這段期間沒有支出。</p>';
+  const arr = Array.from(m).sort((a, b) => b[1] - a[1]);
+  const top = arr.slice(0, 8);
+  let rest = 0;
+  if (arr.length > 8) rest = arr.slice(8).reduce((s, x) => s + x[1], 0);
+  const max = Math.max(...top.map(x => x[1]), rest);
+  let html = top.map(([k, v]) => `<li><button type="button" data-action="cat-ledger" data-cat="${esc(k === '未分類' ? '' : k)}">
+      <span class="c-name">${esc(k)}</span>
+      <span class="c-bar"><span style="width:${(v / max * 100).toFixed(1)}%"></span></span>
+      <span class="c-val">${money(v)}<small>${Math.round(v / total * 100)}%</small></span>
+    </button></li>`).join('');
+  if (rest) html += `<li><button type="button" data-action="view" data-view="ledger"><span class="c-name">其他 ${arr.length - 8} 個科目</span><span class="c-bar"><span style="width:${(rest / max * 100).toFixed(1)}%"></span></span><span class="c-val">${money(rest)}<small>${Math.round(rest / total * 100)}%</small></span></button></li>`;
+  return `<ul class="cats">${html}</ul>`;
+}
+function renderOverview() {
+  const box = $('#ov');
+  if (!ready()) { box.innerHTML = loadingHtml(); return; }
+  if (!S.entries.length) {
+    box.innerHTML = `<div class="empty">
+      <h2>還沒有任何收支紀錄</h2>
+      <p>建議先到「計畫預算」建立執行中的計畫，填上核定經費。之後每一筆收支都能歸到計畫底下，隨時看得到執行率和預算餘額。</p>
+      ${S.canWrite ? '<div class="empty-act"><button class="btn primary" type="button" data-action="new-entry">記一筆</button><button class="btn" type="button" data-action="new-project">建立計畫</button></div>' : ''}
+    </div>`;
+    return;
+  }
+  const list = S.entries.filter(inPeriod);
+  let inc = 0, exp = 0, pInc = 0, nInc = 0, pExp = 0, nExp = 0;
+  for (const e of list) {
+    if (e.type === 'income') { inc += e.amount; if (e.status !== 'done') { pInc += e.amount; nInc++; } }
+    else { exp += e.amount; if (e.status !== 'done') { pExp += e.amount; nExp++; } }
+  }
+  const bal = inc - exp;
+  const pend = [];
+  if (nExp) pend.push(`<button type="button" class="linkish" data-action="go-open" data-type="expense">待核銷 ${nExp} 筆，共 ${money(pExp)} 元</button>`);
+  if (nInc) pend.push(`<button type="button" class="linkish" data-action="go-open" data-type="income">待入帳 ${nInc} 筆，共 ${money(pInc)} 元</button>`);
+  box.innerHTML = `
+    <div class="settle">
+      <div><span class="lbl">收入合計</span><span class="num c-income">${money(inc)}</span></div>
+      <div><span class="lbl">支出合計</span><span class="num c-expense">${money(exp)}</span></div>
+      <div class="balance"><span class="lbl">結餘</span><span class="num ${bal < 0 ? 'c-expense' : ''}"><u>${money(bal)}</u></span></div>
+    </div>
+    <p class="settle-note">${esc(periodName())}，共 ${list.length} 筆，金額單位為新臺幣元</p>
+    <div class="pending">${pend.length ? pend.join('') : '<span>這段期間沒有待核銷或待入帳的款項。</span>'}</div>
+    ${dueHtml()}
+    <section class="block">
+      <div class="block-head"><h2>每月收支</h2><span class="legend"><i class="sw inc"></i>收入<i class="sw exp"></i>支出</span></div>
+      <div class="chart-scroll">${monthlyChart(list)}</div>
+    </section>
+    <div class="split">
+      <section class="block">
+        <div class="block-head"><h2>計畫執行（累計）</h2><button class="linkish" type="button" data-action="view" data-view="projects">所有計畫</button></div>
+        ${ovProjects()}
+      </section>
+      <section class="block">
+        <div class="block-head"><h2>支出科目</h2></div>
+        ${catBreakdown(list)}
+      </section>
+    </div>`;
+  const sc = box.querySelector('.chart-scroll'), svg = sc && sc.querySelector('svg');
+  if (svg && sc.scrollWidth > sc.clientWidth) sc.scrollLeft = Math.max(0, (Number(svg.dataset.focus) || 0) * sc.scrollWidth - sc.clientWidth * 0.75);
+}
+
+/* ledger */
+function matchStatus(e, f) {
+  if (f === 'all') return true;
+  if (f === 'open') return e.status !== 'done';
+  const [k, v] = f.split(':');
+  return (k === 'x' ? e.type === 'expense' : e.type === 'income') && e.status === v;
+}
+function ledgerRows() {
+  const f = S.filters, pm = projMap();
+  const q = f.q.trim().toLowerCase();
+  const rows = S.entries.filter(e => inPeriod(e)
+    && (f.type === 'all' || e.type === f.type)
+    && (f.project === 'all' || (f.project === 'none' ? !pm[e.projectId] : e.projectId === f.project))
+    && (f.category === 'all' || e.category === f.category)
+    && matchStatus(e, f.status)
+    && (!q || [e.summary, e.handler, e.voucherNo, e.note, e.category, (pm[e.projectId] || {}).name || ''].some(s => s.toLowerCase().includes(q))));
+  rows.sort((a, b) => {
+    const c = (a.date || '').localeCompare(b.date || '') || (a.createdAt || '').localeCompare(b.createdAt || '');
+    return S.sortAsc ? c : -c;
+  });
+  return rows;
+}
+function statusHtml(e) {
+  const t = STATUS_TEXT[e.type][e.status];
+  if (e.status === 'done') {
+    let h = 0;
+    for (const ch of e.id) h = (h * 31 + ch.charCodeAt(0)) % 997;
+    return `<span class="seal" style="--r:${-2 - (h % 5)}deg">${t}</span>`;
+  }
+  return `<span class="${e.status === 'processing' ? 'st-proc' : 'st-open'}">${t}</span>`;
+}
+function fillLedgerFilters() {
+  const f = S.filters, st = settings();
+  $('#fType').value = f.type;
+  const act = S.projects.filter(p => p.status === 'active').sort(byName);
+  const closed = S.projects.filter(p => p.status === 'closed').sort(byName);
+  const opt = p => `<option value="${esc(p.id)}">${esc(p.name)}</option>`;
+  let ph = '<option value="all">所有計畫</option><option value="none">不指定計畫</option>';
+  if (act.length) ph += `<optgroup label="執行中">${act.map(opt).join('')}</optgroup>`;
+  if (closed.length) ph += `<optgroup label="已結案">${closed.map(opt).join('')}</optgroup>`;
+  f.project = setOptions($('#fProject'), ph, f.project, 'all');
+  const incC = st.incomeCats.slice(), expC = st.expenseCats.slice();
+  for (const e of S.entries) {
+    if (!e.category) continue;
+    const arr = e.type === 'income' ? incC : expC;
+    if (!arr.includes(e.category)) arr.push(e.category);
+  }
+  const co = c => `<option value="${esc(c)}">${esc(c)}</option>`;
+  const ch = `<option value="all">所有科目</option><optgroup label="收入科目">${incC.map(co).join('')}</optgroup><optgroup label="支出科目">${expC.map(co).join('')}</optgroup>`;
+  f.category = setOptions($('#fCat'), ch, f.category, 'all');
+  $('#fStatus').value = f.status;
+  const qIn = $('#fQ');
+  if (document.activeElement !== qIn && qIn.value !== f.q) qIn.value = f.q;
+  $('#sortBtn').textContent = S.sortAsc ? '日期 ↑' : '日期 ↓';
+  $('#sortBtn').setAttribute('aria-label', S.sortAsc ? '日期由舊到新，按一下改成由新到舊' : '日期由新到舊，按一下改成由舊到新');
+  $('#exportBtn').hidden = !(DL || S.mode === 'local');
+}
+function filtersActive() {
+  const f = S.filters;
+  return f.type !== 'all' || f.project !== 'all' || f.category !== 'all' || f.status !== 'all' || !!f.q.trim();
+}
+function renderLedger() {
+  fillLedgerFilters();
+  const body = $('#ledgerBody'), foot = $('#ledgerFoot'), emptyEl = $('#ledgerEmpty'), sum = $('#ledgerSum'), wrap = $('#ledgerWrap');
+  if (!ready()) { wrap.hidden = true; sum.innerHTML = ''; emptyEl.innerHTML = loadingHtml(); $('#moreWrap').hidden = true; return; }
+  const rows = ledgerRows();
+  const pm = projMap();
+  let inc = 0, exp = 0;
+  for (const e of rows) { if (e.type === 'income') inc += e.amount; else exp += e.amount; }
+  sum.innerHTML = `<span>${esc(periodName())}，符合條件 ${rows.length} 筆</span>${filtersActive() ? '<button type="button" class="linkish" data-action="clear-filters">清除篩選</button>' : ''}`;
+  if (!rows.length) {
+    wrap.hidden = true;
+    $('#moreWrap').hidden = true;
+    if (!S.entries.length) {
+      sum.innerHTML = '';
+      emptyEl.innerHTML = `<div class="empty"><h2>還沒有任何收支紀錄</h2><p>每一筆收入或支出記下來後，會照日期排在這裡，可以依計畫、科目和核銷狀態篩選，也能匯出成 Excel 讀得到的 CSV。</p>${S.canWrite ? '<div class="empty-act"><button class="btn primary" type="button" data-action="new-entry">記一筆</button></div>' : ''}</div>`;
+    } else {
+      emptyEl.innerHTML = `<div class="empty"><p>沒有符合條件的紀錄。可以換個期間，或清除篩選看看。</p></div>`;
+    }
+    return;
+  }
+  emptyEl.innerHTML = '';
+  wrap.hidden = false;
+  const shown = rows.slice(0, S.limit);
+  body.innerHTML = shown.map(e => {
+    const p = pm[e.projectId];
+    const isInc = e.type === 'income';
+    return `<tr class="row" data-id="${esc(e.id)}" tabindex="0">
+      <td class="c-date">${esc(fmtDate(e.date))}</td>
+      <td class="c-cat">${esc(e.category)}</td>
+      <td class="c-sum"><div class="sum">${esc(e.summary)}</div>${p ? `<div class="sub">${esc(p.name)}</div>` : ''}</td>
+      <td class="c-hand">${esc(e.handler)}</td>
+      <td class="c-vou">${esc(e.voucherNo)}</td>
+      <td class="c-st">${statusHtml(e)}</td>
+      <td class="num c-inc c-income${isInc ? '' : ' empty'}">${isInc ? money(e.amount) : ''}</td>
+      <td class="num c-exp c-expense${isInc ? ' empty' : ''}">${isInc ? '' : money(e.amount)}</td>
+    </tr>`;
+  }).join('');
+  const net = inc - exp;
+  foot.innerHTML = `<tr class="tot"><td colspan="6">合計 ${rows.length} 筆</td><td class="num c-income">${money(inc)}</td><td class="num c-expense">${money(exp)}</td></tr>
+    <tr class="net"><td colspan="6">收支淨額</td><td class="num" colspan="2"><span class="${net < 0 ? 'c-expense' : ''}">${money(net)}</span></td></tr>`;
+  const moreWrap = $('#moreWrap');
+  moreWrap.hidden = rows.length <= S.limit;
+  if (!moreWrap.hidden) $('#moreBtn').textContent = `再顯示 ${Math.min(PAGE, rows.length - S.limit)} 筆（目前 ${S.limit} 筆，共 ${rows.length} 筆）`;
+}
+
+/* projects */
+function renderProjects() {
+  $('#addProj').hidden = !(S.canWrite && ready());
+  $$('[data-pf]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.pf === S.projFilter)));
+  const box = $('#projList');
+  if (!ready()) { box.innerHTML = loadingHtml(); return; }
+  if (!S.projects.length) {
+    box.innerHTML = `<div class="empty"><h2>還沒有計畫</h2><p>建立計畫並填上核定經費和執行期間，就能追蹤每個計畫花了多少、還剩多少，以及經費進度有沒有跟上時間。</p>${S.canWrite ? '<div class="empty-act"><button class="btn primary" type="button" data-action="new-project">新增計畫</button></div>' : ''}</div>`;
+    return;
+  }
+  const stats = projStats();
+  const list = S.projects.filter(p => S.projFilter === 'all' || p.status === S.projFilter)
+    .sort((a, b) => (a.status === b.status ? 0 : a.status === 'active' ? -1 : 1) || (b.start || '').localeCompare(a.start || '') || byName(a, b));
+  if (!list.length) {
+    box.innerHTML = `<p class="muted" style="padding:20px 0">沒有${S.projFilter === 'active' ? '執行中' : '已結案'}的計畫。</p>`;
+    return;
+  }
+  const due = dueGroups();
+  box.innerHTML = list.map(p => {
+    const x = execInfo(p, stats[p.id]);
+    const period = p.start || p.end ? `${p.start ? fmtDate(p.start) : '未填'} 至 ${p.end ? fmtDate(p.end) : '未填'}` : '';
+    const subs = [p.code, p.sponsor, period].filter(Boolean).map(s => `<p class="pv-sub">${esc(s)}</p>`).join('');
+    return `<article class="pv-row">
+      <div><h3>${esc(p.name)}</h3>${subs}${p.status === 'closed' ? '<span class="closed-tag">已結案</span>' : ''}${recLines(p, due)}${addButtons(p, 'small')}</div>
+      <dl class="pv-figs">
+        <dt>核定經費</dt><dd>${p.budget > 0 ? money(p.budget) : '—'}</dd>
+        <dt>已支出</dt><dd class="c-expense">${money(x.exp)}</dd>
+        <dt>預算餘額</dt><dd class="${x.remain < 0 ? 'c-expense' : ''}">${p.budget > 0 ? money(x.remain) : '—'}</dd>
+        <dt>已記收入</dt><dd class="c-income">${money(x.inc)}</dd>
+      </dl>
+      <div class="pv-exec">${barHtml(x)}<p class="pv-note">${esc(execNote(x))}${flagsHtml(x)}</p></div>
+      <div class="pv-act">
+        <button class="btn small" type="button" data-action="proj-ledger" data-pid="${esc(p.id)}">看明細</button>
+        ${S.canWrite ? `<button class="btn small" type="button" data-action="edit-project" data-pid="${esc(p.id)}">編輯</button>` : ''}
+      </div>
+    </article>`;
+  }).join('');
+}
+
+/* settings */
+function catChips(kind, list) {
+  return list.map(c => `<span class="chip">${esc(c)}${S.canWrite && list.length > 1 ? `<button type="button" class="chip-x" data-action="rm-cat" data-kind="${kind}" data-cat="${esc(c)}" aria-label="移除科目 ${esc(c)}">×</button>` : ''}</span>`).join('');
+}
+function renderSettings() {
+  const st = settings();
+  const nameIn = $('#sName');
+  if (document.activeElement !== nameIn && !nameIn.dataset.dirty) nameIn.value = st.centerName;
+  if (!$('#basicFields').dataset.dirty) $$('input[name="sFiscal"]').forEach(r => { r.checked = Number(r.value) === st.fiscalStart; });
+  $('#basicFields').disabled = !S.canWrite || !ready();
+  $('#saveBasics').hidden = !S.canWrite;
+  $('#incCats').innerHTML = catChips('income', st.incomeCats);
+  $('#expCats').innerHTML = catChips('expense', st.expenseCats);
+  $('#incAddRow').hidden = !S.canWrite;
+  $('#expAddRow').hidden = !S.canWrite;
+  $$('input[name="sDate"]').forEach(r => { r.checked = r.value === S.dateStyle; });
+  $('#dataInfo').textContent = S.mode === 'local'
+    ? MSG_LOCAL
+    : '資料存在這個頁面的共用資料庫。把頁面分享給同事，並給他們可以編輯的權限，大家就能一起記帳，也會即時看到彼此新增或修改的紀錄。只給檢視權限的人只能看、不能改。';
+}
+
+/* ---------- entry dialog ---------- */
+let editing = null, curType = 'expense', saving = false;
+const last = { type: 'expense', cat: { income: '', expense: '' }, project: '', handler: '' };
+function setType(type, preferCat) {
+  curType = type;
+  $$('.typeseg button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.t === type)));
+  const st = settings();
+  const list = (type === 'income' ? st.incomeCats : st.expenseCats).slice();
+  if (preferCat && !list.includes(preferCat)) list.push(preferCat);
+  const sel = $('#eCat');
+  sel.innerHTML = list.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
+  sel.value = preferCat && list.includes(preferCat) ? preferCat : list[0];
+  $('#eStatusLbl').textContent = type === 'income' ? '入帳狀態' : '核銷狀態';
+}
+function renderStatus(type, value) {
+  $('#eStatus').innerHTML = STATUS[type].map(s => `<label class="rchip"><input type="radio" name="eStatus" value="${s.v}"${s.v === value ? ' checked' : ''}><span>${s.t}</span></label>`).join('');
+}
+function fillProjectSelect(sel, pid) {
+  const act = S.projects.filter(p => p.status === 'active').sort(byName);
+  const closed = S.projects.filter(p => p.status === 'closed').sort(byName);
+  const o = p => `<option value="${esc(p.id)}">${esc(p.name)}</option>`;
+  let h = '<option value="">不指定計畫</option>';
+  if (act.length) h += `<optgroup label="執行中">${act.map(o).join('')}</optgroup>`;
+  if (closed.length) h += `<optgroup label="已結案">${closed.map(o).join('')}</optgroup>`;
+  sel.innerHTML = h;
+  sel.value = S.projects.some(p => p.id === pid) ? pid : '';
+}
+function setErr(id, msg) {
+  const el = $('#' + id), er = $('#' + id + 'Err');
+  if (er) er.textContent = msg || '';
+  if (el) { if (msg) el.setAttribute('aria-invalid', 'true'); else el.removeAttribute('aria-invalid'); }
+}
+function flash(id, msg, bad) { const f = $('#' + id); f.textContent = msg; f.classList.toggle('bad', !!bad); }
+let metaToken = 0;
+async function fillMeta(e) {
+  const el = $('#entryMeta');
+  el.textContent = '';
+  if (!e) return;
+  const tok = ++metaToken;
+  let who = '';
+  if (USER && e.createdBy) {
+    try { const ps = await USER.profiles([e.createdBy]); who = (ps[e.createdBy] && ps[e.createdBy].name) || ''; } catch (err) {}
+  }
+  if (tok !== metaToken) return;
+  const parts = [];
+  if (who) parts.push(`${who} 建立`);
+  if (e.updatedAt) parts.push(`最後更新 ${fmtDateTime(e.updatedAt)}`);
+  el.textContent = parts.join('，');
+}
+function openEntry(e, preset) {
+  editing = e || null;
+  preset = e ? null : (preset || null);
+  const ro = !S.canWrite;
+  $('#eFields').disabled = ro;
+  $('#entryTitle').textContent = e ? (ro ? '紀錄內容' : '編輯紀錄') : '記一筆';
+  const type = e ? e.type : (preset && preset.type) || last.type;
+  setType(type, e ? e.category : last.cat[type]);
+  $('#eDate').value = e ? e.date : todayStr();
+  $('#eAmount').value = e ? money(e.amount) : '';
+  fillProjectSelect($('#eProject'), e ? e.projectId : (preset && preset.projectId != null ? preset.projectId : last.project));
+  $('#eSummary').value = e ? e.summary : '';
+  $('#eHandler').value = e ? e.handler : last.handler;
+  $('#eVoucher').value = e ? e.voucherNo : '';
+  $('#eNote').value = e ? e.note : '';
+  renderStatus(type, e ? e.status : (type === 'income' ? 'done' : 'unsubmitted'));
+  ['eDate', 'eAmount', 'eSummary'].forEach(id => setErr(id, ''));
+  flash('eFlash', '');
+  $('#eDelete').hidden = !e || ro;
+  $('#eSaveNext').hidden = !!e || ro;
+  $('#eSave').hidden = ro;
+  $('#eCancel').textContent = ro ? '關閉' : '取消';
+  fillMeta(e);
+  const dlg = $('#entryDlg');
+  if (!dlg.open) dlg.showModal();
+  if (!ro) setTimeout(() => (e ? $('#eSummary') : $('#eAmount')).focus(), 20);
+}
+async function saveEntry(keepGoing) {
+  if (!S.canWrite || saving) return;
+  const date = $('#eDate').value;
+  const amount = parseAmount($('#eAmount').value);
+  const summary = $('#eSummary').value.trim();
+  const category = $('#eCat').value;
+  setErr('eDate', validDate(date) ? '' : '請選擇日期');
+  setErr('eAmount', amount === null ? '請輸入大於 0 的整數金額' : '');
+  setErr('eSummary', summary ? '' : '請寫一句摘要，之後查帳比較好找');
+  const bad = ['eDate', 'eAmount', 'eSummary'].find(id => $('#' + id).getAttribute('aria-invalid') === 'true');
+  if (bad) { $('#' + bad).focus(); return; }
+  const checked = $('input[name="eStatus"]:checked');
+  const status = checked ? checked.value : (curType === 'income' ? 'done' : 'unsubmitted');
+  const now = new Date().toISOString();
+  const body = {
+    date, type: curType, amount, summary, category, status,
+    projectId: $('#eProject').value || '',
+    handler: $('#eHandler').value.trim().slice(0, 40),
+    voucherNo: $('#eVoucher').value.trim().slice(0, 40),
+    note: $('#eNote').value.trim().slice(0, 500),
+    createdBy: editing ? (editing.createdBy || null) : (S.myId || null),
+    createdAt: editing ? (editing.createdAt || now) : now,
+    updatedBy: S.myId || null,
+    updatedAt: now
+  };
+  saving = true;
+  ['eSave', 'eSaveNext'].forEach(id => { $('#' + id).disabled = true; });
+  flash('eFlash', '儲存中…');
+  try {
+    await Store.setDoc('entries', editing ? editing.id : null, body);
+    last.type = curType; last.cat[curType] = category; last.project = body.projectId; last.handler = body.handler;
+    if (keepGoing) {
+      $('#eAmount').value = ''; $('#eSummary').value = ''; $('#eVoucher').value = ''; $('#eNote').value = '';
+      flash('eFlash', `已儲存「${summary.slice(0, 16)}」，接著記下一筆`);
+      $('#eAmount').focus();
+    } else {
+      flash('eFlash', '');
+      $('#entryDlg').close();
+      toast('已儲存');
+    }
+  } catch (err) {
+    flash('eFlash', writeErrMsg(err), true);
+  } finally {
+    saving = false;
+    ['eSave', 'eSaveNext'].forEach(id => { $('#' + id).disabled = false; });
+  }
+}
+function confirmBox(msg, yes) {
+  const d = $('#confirmDlg');
+  $('#confirmMsg').textContent = msg;
+  $('#cYes').textContent = yes;
+  return new Promise(res => {
+    let result = false;
+    $('#cYes').onclick = () => { result = true; d.close(); };
+    $('#cNo').onclick = () => d.close();
+    d.addEventListener('close', () => res(result), { once: true });
+    d.showModal();
+    $('#cNo').focus();
+  });
+}
+async function deleteEntry() {
+  if (!editing || !S.canWrite) return;
+  const e = editing;
+  const ok = await confirmBox(`要刪除「${e.summary}」這筆 ${money(e.amount)} 元的${e.type === 'income' ? '收入' : '支出'}嗎？刪除後無法復原。`, '刪除');
+  if (!ok) return;
+  try { await Store.del('entries', e.id); $('#entryDlg').close(); toast('已刪除'); }
+  catch (err) { flash('eFlash', writeErrMsg(err), true); }
+}
+
+/* ---------- project dialog ---------- */
+let editingP = null, savingP = false;
+function parseMonth(v) {
+  const m = String(v || '').trim().match(/^(\d{4})\s*[-\/年.]\s*(\d{1,2})\s*月?$/);
+  if (!m) return null;
+  const mo = Number(m[2]);
+  return mo >= 1 && mo <= 12 ? `${m[1]}-${pad(mo)}` : null;
+}
+function ruleRowHtml(r) {
+  const cats = settings().expenseCats.slice();
+  if (r.category && !cats.includes(r.category)) cats.push(r.category);
+  return `<div class="rec-rule" data-rid="${esc(r.id)}">
+    <input class="r-sum" maxlength="30" placeholder="項目，例如主持人費" value="${esc(r.summary)}" aria-label="固定支出項目">
+    <select class="r-cat" aria-label="科目">${cats.map(c => `<option value="${esc(c)}"${c === r.category ? ' selected' : ''}>${esc(c)}</option>`).join('')}</select>
+    <input class="r-amt" inputmode="numeric" placeholder="每月金額" value="${r.amount ? money(r.amount) : ''}" aria-label="每月金額">
+    <button type="button" class="chip-x r-del" aria-label="移除這項固定支出">×</button>
+    <div class="r2">
+      <span>從</span><input class="r-start" type="month" placeholder="2026-10" value="${esc(r.start)}" aria-label="開始月份">
+      <span>到</span><input class="r-end" type="month" placeholder="可留空" value="${esc(r.end)}" aria-label="結束月份，可留空">
+      <span>記入後</span><select class="r-st" aria-label="記入後的核銷狀態">${STATUS.expense.map(o => `<option value="${o.v}"${o.v === r.status ? ' selected' : ''}>${o.t}</option>`).join('')}</select>
+    </div>
+    <div class="err r-err"></div>
+  </div>`;
+}
+function newRule() {
+  const cats = settings().expenseCats;
+  const endMonth = ($('#pEnd').value || '').slice(0, 7);
+  const start = curMonth();
+  return { id: 'r' + genId(), summary: '', category: cats.includes('人事費') ? '人事費' : cats[0], amount: 0, start, end: validMonth(endMonth) && endMonth >= start ? endMonth : '', status: 'unsubmitted', doneMonths: [] };
+}
+function readRules() {
+  const latest = editingP ? (S.projects.find(x => x.id === editingP.id) || editingP) : null;
+  const rules = [];
+  let bad = null;
+  $$('#pRec .rec-rule').forEach(row => {
+    const summary = row.querySelector('.r-sum').value.trim();
+    const amount = parseAmount(row.querySelector('.r-amt').value);
+    const start = parseMonth(row.querySelector('.r-start').value);
+    const endRaw = row.querySelector('.r-end').value.trim();
+    const end = endRaw ? parseMonth(endRaw) : '';
+    let msg = '';
+    if (!summary) msg = '請填項目名稱，例如主持人費';
+    else if (amount === null) msg = '請填每月金額（整數）';
+    else if (!start) msg = '請填開始月份，例如 2026-10';
+    else if (end === null) msg = '結束月份請寫成 2027-06 這樣，不限期可以留空';
+    else if (end && end < start) msg = '結束月份要在開始月份之後';
+    row.querySelector('.r-err').textContent = msg;
+    if (msg && !bad) bad = row;
+    const prev = latest && latest.recurring.find(r => r.id === row.dataset.rid);
+    rules.push({ id: row.dataset.rid, summary: summary.slice(0, 30), category: row.querySelector('.r-cat').value, amount: amount || 0, start: start || '', end: end || '', status: row.querySelector('.r-st').value, doneMonths: prev ? prev.doneMonths.slice() : [] });
+  });
+  return { rules, bad };
+}
+function openProject(p) {
+  if (!S.canWrite) return;
+  editingP = p || null;
+  $('#projTitle').textContent = p ? '編輯計畫' : '新增計畫';
+  $('#pName').value = p ? p.name : '';
+  $('#pCode').value = p ? p.code : '';
+  $('#pSponsor').value = p ? p.sponsor : '';
+  $('#pBudget').value = p && p.budget ? money(p.budget) : '';
+  $('#pStatus').value = p ? p.status : 'active';
+  $('#pStart').value = p ? p.start : '';
+  $('#pEnd').value = p ? p.end : '';
+  $('#pNote').value = p ? p.note : '';
+  $('#pRec').innerHTML = (p ? p.recurring : []).map(ruleRowHtml).join('');
+  ['pName', 'pBudget', 'pEnd'].forEach(id => setErr(id, ''));
+  flash('pFlash', '');
+  $('#pDelete').hidden = !p;
+  const d = $('#projDlg');
+  if (!d.open) d.showModal();
+  setTimeout(() => $('#pName').focus(), 20);
+}
+async function saveProject() {
+  if (!S.canWrite || savingP) return;
+  const name = $('#pName').value.trim();
+  const rawBudget = $('#pBudget').value.trim();
+  const budget = rawBudget ? parseAmount(rawBudget, true) : 0;
+  const start = $('#pStart').value, end = $('#pEnd').value;
+  setErr('pName', name ? '' : '請填計畫名稱');
+  setErr('pBudget', budget === null ? '請輸入整數金額，沒有核定經費可以留空' : '');
+  setErr('pEnd', start && end && end < start ? '結束日期要在開始日期之後' : '');
+  const bad = ['pName', 'pBudget', 'pEnd'].find(id => $('#' + id).getAttribute('aria-invalid') === 'true');
+  if (bad) { $('#' + bad).focus(); return; }
+  const rr = readRules();
+  if (rr.bad) { rr.bad.querySelector('input').focus(); return; }
+  const now = new Date().toISOString();
+  const body = {
+    name: name.slice(0, 120), budget,
+    recurring: rr.rules,
+    code: $('#pCode').value.trim().slice(0, 60),
+    sponsor: $('#pSponsor').value.trim().slice(0, 120),
+    status: $('#pStatus').value === 'closed' ? 'closed' : 'active',
+    start: validDate(start) ? start : '',
+    end: validDate(end) ? end : '',
+    note: $('#pNote').value.trim().slice(0, 500),
+    createdBy: editingP ? (editingP.createdBy || null) : (S.myId || null),
+    createdAt: editingP ? (editingP.createdAt || now) : now,
+    updatedAt: now
+  };
+  savingP = true;
+  $('#pSave').disabled = true;
+  flash('pFlash', '儲存中…');
+  try {
+    await Store.setDoc('projects', editingP ? editingP.id : null, body);
+    flash('pFlash', '');
+    $('#projDlg').close();
+    toast('已儲存');
+  } catch (err) {
+    flash('pFlash', writeErrMsg(err), true);
+  } finally {
+    savingP = false;
+    $('#pSave').disabled = false;
+  }
+}
+async function deleteProject() {
+  if (!editingP || !S.canWrite) return;
+  const p = editingP;
+  const n = S.entries.filter(e => e.projectId === p.id).length;
+  const msg = n
+    ? `要刪除計畫「${p.name}」嗎？有 ${n} 筆收支屬於這個計畫，刪除後它們會變成「不指定計畫」。如果只是計畫結束了，建議改成「已結案」就好。`
+    : `要刪除計畫「${p.name}」嗎？刪除後無法復原。`;
+  const ok = await confirmBox(msg, '刪除計畫');
+  if (!ok) return;
+  try { await Store.del('projects', p.id); $('#projDlg').close(); toast('已刪除'); }
+  catch (err) { flash('pFlash', writeErrMsg(err), true); }
+}
+
+/* ---------- settings actions ---------- */
+async function saveSettingsPatch(patch, okMsg) {
+  if (!S.canWrite) return false;
+  const st = settings();
+  const body = Object.assign({ centerName: st.centerName, fiscalStart: st.fiscalStart, incomeCats: st.incomeCats, expenseCats: st.expenseCats }, patch);
+  try { await Store.setSettings(body); toast(okMsg); return true; }
+  catch (err) { toast(writeErrMsg(err)); return false; }
+}
+async function addCat(kind) {
+  const input = kind === 'income' ? $('#incNew') : $('#expNew');
+  const v = input.value.trim().slice(0, 20);
+  if (!v) { input.focus(); return; }
+  const st = settings();
+  const key = kind === 'income' ? 'incomeCats' : 'expenseCats';
+  if (st[key].includes(v)) { toast(`「${v}」已經在清單裡了`); return; }
+  if (await saveSettingsPatch({ [key]: st[key].concat([v]) }, `已新增科目「${v}」`)) input.value = '';
+}
+async function removeCat(kind, cat) {
+  const st = settings();
+  const key = kind === 'income' ? 'incomeCats' : 'expenseCats';
+  const next = st[key].filter(c => c !== cat);
+  if (!next.length) return;
+  await saveSettingsPatch({ [key]: next }, `已移除科目「${cat}」，既有紀錄不受影響`);
+}
+
+/* ---------- export ---------- */
+function csvCell(v) {
+  let s = String(v == null ? '' : v);
+  if (/^[=+\-@]/.test(s)) s = "'" + s;
+  return /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
+async function exportCsv() {
+  const rows = ledgerRows(), pm = projMap();
+  if (!rows.length) { toast('目前沒有可匯出的紀錄'); return; }
+  const head = ['日期', '類型', '計畫', '科目', '摘要', '收入', '支出', '經手人', '憑證編號', '狀態', '備註'];
+  const lines = [head].concat(rows.map(e => [
+    e.date, e.type === 'income' ? '收入' : '支出', (pm[e.projectId] || {}).name || '', e.category, e.summary,
+    e.type === 'income' ? e.amount : '', e.type === 'expense' ? e.amount : '',
+    e.handler, e.voucherNo, STATUS_TEXT[e.type][e.status], e.note
+  ]));
+  const csv = '\uFEFF' + lines.map(r => r.map(csvCell).join(',')).join('\r\n');
+  const filename = `${settings().centerName}收支明細_${periodName().replace(/\s/g, '')}_${todayStr()}.csv`;
+  if (DL) {
+    try { await DL.save({ filename, data: csv }); toast('已匯出'); }
+    catch (err) {
+      const c = err && err.code;
+      if (c === 'declined') return;
+      toast(c === 'rate_limited' ? '已經有一個下載在等你確認，請稍後再試' : '這次無法匯出檔案');
+    }
+    return;
+  }
+  try {
+    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+    const a = document.createElement('a');
+    a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+  } catch (err) { toast('這次無法匯出檔案'); }
+}
+
+/* ---------- navigation ---------- */
+function switchView(v) {
+  S.view = v;
+  $$('.view').forEach(sec => { sec.hidden = sec.id !== 'view-' + v; });
+  renderAll();
+  window.scrollTo(0, 0);
+}
+function goLedger(patch, allPeriod) {
+  S.filters = Object.assign({ type: 'all', project: 'all', category: 'all', status: 'all', q: '' }, patch);
+  $('#fQ').value = S.filters.q;
+  if (allPeriod) S.period = 'all';
+  S.limit = PAGE;
+  switchView('ledger');
+}
+let toastTimer = 0;
+function toast(msg) {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+/* ---------- events ---------- */
+function bindUI() {
+  $$('.tab').forEach(t => t.addEventListener('click', () => switchView(t.dataset.view)));
+  $('#period').addEventListener('change', e => { S.period = e.target.value; S.limit = PAGE; renderAll(); });
+  $('#addBtn').addEventListener('click', () => openEntry(null, { projectId: '' }));
+
+  $('#fType').addEventListener('change', e => { S.filters.type = e.target.value; S.limit = PAGE; renderLedger(); });
+  $('#fProject').addEventListener('change', e => { S.filters.project = e.target.value; S.limit = PAGE; renderLedger(); });
+  $('#fCat').addEventListener('change', e => { S.filters.category = e.target.value; S.limit = PAGE; renderLedger(); });
+  $('#fStatus').addEventListener('change', e => { S.filters.status = e.target.value; S.limit = PAGE; renderLedger(); });
+  let qTimer = 0;
+  $('#fQ').addEventListener('input', e => { clearTimeout(qTimer); const v = e.target.value; qTimer = setTimeout(() => { S.filters.q = v; S.limit = PAGE; renderLedger(); }, 160); });
+  $('#sortBtn').addEventListener('click', () => { S.sortAsc = !S.sortAsc; renderLedger(); });
+  $('#moreBtn').addEventListener('click', () => { S.limit += PAGE; renderLedger(); });
+  $('#exportBtn').addEventListener('click', exportCsv);
+  const openRow = tr => { const e = S.entries.find(x => x.id === tr.dataset.id); if (e) openEntry(e); };
+  $('#ledgerBody').addEventListener('click', e => { const tr = e.target.closest('tr.row'); if (tr) openRow(tr); });
+  $('#ledgerBody').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { const tr = e.target.closest('tr.row'); if (tr) { e.preventDefault(); openRow(tr); } } });
+
+  $$('[data-pf]').forEach(b => b.addEventListener('click', () => { S.projFilter = b.dataset.pf; renderProjects(); }));
+  $('#addProj').addEventListener('click', () => openProject(null));
+
+  document.addEventListener('click', e => {
+    const el = e.target.closest('[data-action]');
+    if (!el) return;
+    const a = el.dataset.action;
+    if (a === 'go-open') goLedger({ type: el.dataset.type, status: 'open' });
+    else if (a === 'view') switchView(el.dataset.view);
+    else if (a === 'new-entry') openEntry(null, { projectId: '' });
+    else if (a === 'new-project') openProject(null);
+    else if (a === 'proj-ledger') goLedger({ project: el.dataset.pid }, true);
+    else if (a === 'rec-do') recordDue(el.dataset.pid, el.dataset.rid, false);
+    else if (a === 'rec-skip') recordDue(el.dataset.pid, el.dataset.rid, true);
+    else if (a === 'add-to-project') openEntry(null, { type: el.dataset.type === 'income' ? 'income' : 'expense', projectId: el.dataset.pid });
+    else if (a === 'edit-project') { const p = S.projects.find(x => x.id === el.dataset.pid); if (p) openProject(p); }
+    else if (a === 'cat-ledger') goLedger(el.dataset.cat ? { type: 'expense', category: el.dataset.cat } : { type: 'expense' });
+    else if (a === 'clear-filters') goLedger({});
+    else if (a === 'add-cat') addCat(el.dataset.kind);
+    else if (a === 'rm-cat') removeCat(el.dataset.kind, el.dataset.cat);
+  });
+
+  $$('.typeseg button').forEach(b => b.addEventListener('click', () => {
+    if (b.dataset.t === curType) return;
+    setType(b.dataset.t, last.cat[b.dataset.t]);
+    renderStatus(b.dataset.t, b.dataset.t === 'income' ? 'done' : 'unsubmitted');
+  }));
+  $('#entryForm').addEventListener('submit', e => { e.preventDefault(); saveEntry(false); });
+  $('#eSaveNext').addEventListener('click', () => saveEntry(true));
+  $('#eCancel').addEventListener('click', () => $('#entryDlg').close());
+  $('#eDelete').addEventListener('click', deleteEntry);
+  $('#eAmount').addEventListener('blur', e => { const n = parseAmount(e.target.value); if (n !== null) e.target.value = money(n); });
+  $('#pBudget').addEventListener('blur', e => { const n = parseAmount(e.target.value, true); if (n !== null) e.target.value = money(n); });
+
+  $('#projForm').addEventListener('submit', e => { e.preventDefault(); saveProject(); });
+  $('#pCancel').addEventListener('click', () => $('#projDlg').close());
+  $('#pDelete').addEventListener('click', deleteProject);
+  $('#pRecAdd').addEventListener('click', () => {
+    $('#pRec').insertAdjacentHTML('beforeend', ruleRowHtml(newRule()));
+    const rows = $$('#pRec .rec-rule');
+    rows[rows.length - 1].querySelector('.r-sum').focus();
+  });
+  $('#pRec').addEventListener('click', e => { const b = e.target.closest('.r-del'); if (b) b.closest('.rec-rule').remove(); });
+  $('#pRec').addEventListener('focusout', e => {
+    if (e.target.classList.contains('r-amt')) { const n = parseAmount(e.target.value); if (n !== null) e.target.value = money(n); }
+  });
+
+  $('#sName').addEventListener('input', e => { e.target.dataset.dirty = '1'; });
+  $$('input[name="sFiscal"]').forEach(r => r.addEventListener('change', () => { $('#basicFields').dataset.dirty = '1'; }));
+  $('#saveBasics').addEventListener('click', async () => {
+    const name = $('#sName').value.trim().slice(0, 30);
+    if (!name) { toast('請填中心名稱'); $('#sName').focus(); return; }
+    const r = $('input[name="sFiscal"]:checked');
+    const ok = await saveSettingsPatch({ centerName: name, fiscalStart: r && r.value === '8' ? 8 : 1 }, '已儲存');
+    if (ok) {
+      delete $('#sName').dataset.dirty;
+      delete $('#basicFields').dataset.dirty;
+      S.period = null;
+      renderAll();
+    }
+  });
+  let rTimer = 0, lastW = window.innerWidth;
+  window.addEventListener('resize', () => {
+    clearTimeout(rTimer);
+    rTimer = setTimeout(() => { if (window.innerWidth !== lastW) { lastW = window.innerWidth; if (S.view === 'overview') renderOverview(); } }, 200);
+  });
+  $('#incNew').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); addCat('income'); } });
+  $('#expNew').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); addCat('expense'); } });
+  $$('input[name="sDate"]').forEach(r => r.addEventListener('change', () => {
+    S.dateStyle = r.value === 'ad' ? 'ad' : 'roc';
+    try { localStorage.setItem(PREF_DATE, S.dateStyle); } catch (e) {}
+    renderAll();
+  }));
+}
+
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+else init();
+})();
+</script>
+</body>
+</html>
